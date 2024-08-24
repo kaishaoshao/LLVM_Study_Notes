@@ -21,7 +21,7 @@
 *.a
 *.la
 *.lo
-
+*.ll
 # Shared objects (inc. Windows DLLs)
 *.dll
 *.so
@@ -52,4 +52,4 @@ Mkfile.old
 dkms.conf
 
 # output
-*/output/
+*output*
