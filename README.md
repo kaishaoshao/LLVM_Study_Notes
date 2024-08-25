@@ -1,6 +1,6 @@
 # LLVM学习笔记
 
-LLVM Cookbook一书的书籍以及源码(llvm相关学习书籍)
+记录我学习LLVM的
 
 ## 源码目录结构
 
