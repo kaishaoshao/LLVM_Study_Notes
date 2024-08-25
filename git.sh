@@ -3,7 +3,7 @@
 # 检查是否提供了提交信息
 if [ -z "$1" ]; then
 	echo "error: add commit message"
-	echo "help: $0 <message>"
+	echo "tip: $0 <message>"
 	exit 1
 fi
 
