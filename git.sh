@@ -10,6 +10,14 @@ fi
 
 commit_message="$1"
 
+# 拉取源代码同步更新
+git pull
+if [ $? -ne 0 ]; then
+	echo "failed to pull the main"
+	exit 1
+fi
+
+
 # 添加所有更改到暂存区
 git add .
 if [ $? -ne 0 ]; then
