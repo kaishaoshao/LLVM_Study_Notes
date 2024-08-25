@@ -7,7 +7,16 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
+
 commit_message="$1"
+
+# 添加所有更改到暂存区
+git add .
+if [ $? -ne 0 ]; then
+	echo "failed to add changes to the staging area"
+	exit 1
+fi
+
 
 # 检查是否有未提交的更改
 if ! git diff-index --quiet HEAD --; then
