@@ -1,7 +1,8 @@
 
 #include "parser.h"
+#include <cctype>
 #include <memory>
-
+#include <map>
 
 // 词法解析器
 // 上面构建了一个AST，我们需要定义解析器代码来构建
@@ -35,6 +36,21 @@ static std::unique_ptr<ExprAST> ParseParenExpr(){
     getNextToken(); //eat ')'
     return V; 
 }
+
+// 二进制表达式解析
+static std::map<char,int> BinopPrecedence;  // 用于存出二元运算符的优先级4
+
+static int GetTokPrecedence(){
+    if (!isascii(CurTok))   // ASCII
+        return -1;
+    // 确保当前运算符是一个已声明的二元运算符
+    int TokPrec = BinopPrecedence[CurTok];
+    if(TokPrec <= 0)
+        return -1;
+    return TokPrec;
+}
+
+
  
 // 处理变量引用和函数调用
 static std::unique_ptr<ExprAST> ParseExpression(){
@@ -45,12 +61,19 @@ static std::unique_ptr<ExprAST> ParseExpression(){
         return std::make_unique<VariableExperAST>(IdName);
     }
 
-
-    
 }
 
 
 
+int main()
+{
+      // Install standard binary operators.
+  // 1 is lowest precedence.
+  BinopPrecedence['<'] = 10;
+  BinopPrecedence['+'] = 20;
+  BinopPrecedence['-'] = 20;
+  BinopPrecedence['*'] = 40;  // highest. 
+}
 
 
 
