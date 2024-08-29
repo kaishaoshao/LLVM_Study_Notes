@@ -70,7 +70,7 @@ static int gettok() {
     return ThisChar;
 }
 
-static int getNextToken() {
+int getNextToken()   {
     return CurTok = gettok();
 }
 

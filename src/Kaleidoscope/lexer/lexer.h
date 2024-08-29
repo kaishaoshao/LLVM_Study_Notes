@@ -1,5 +1,5 @@
-#define __LEXER_H
-#ifdef __LEXER_H
+#define __LEXER_H__
+#ifdef __LEXER_H__
 #include <string>
 
 enum ToKen{
@@ -17,5 +17,7 @@ static std::string IdentifierStr;
 static double NumVal;
 
 static int CurTok;
+
+int getNextToken(); 
 
 #endif
