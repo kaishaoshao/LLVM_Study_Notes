@@ -3,7 +3,7 @@ HEADERS = $(shell find ast kaleidoscope lexer logger parser -name '*.h')
 OBJ = ${SOURCES:.cc=.o}
 
 CC =  clang++  -std=c++14
-CFLAGS = -g -O3 -I llvm/include -I llvm/build/include -I ./
+CFLAGS = -g -O0 -I llvm/include -I llvm/build/include -I ./
 LLVMFLAGS = `llvm-config --cxxflags --ldflags --system-libs --libs all`
 
 .PHONY: main

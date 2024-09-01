@@ -35,5 +35,7 @@ int main()
   BinopPrecedence['*'] = 40;  // highest. 
 
   fprintf(stderr, "ready> ");
+  getNextToken();
   MainLoop();
+  return 0;
 }

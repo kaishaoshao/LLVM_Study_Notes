@@ -4,15 +4,15 @@
 #define __PARSER_H__
 #ifdef  __PARSER_H__
 
-static std::map<char,int> BinopPrecedence;  // 用于存出二元运算符的优先级4
+extern std::map<char,int> BinopPrecedence;  // 用于存出二元运算符的优先级4
 
 
-static std::unique_ptr<ExprAST> ParseExpression();
+std::unique_ptr<ExprAST> ParseExpression();
 
-static void HandleTopLevelExpression();
+void HandleTopLevelExpression();
 
-static void HandleExtern();
+void HandleExtern();
 
-static void HandleDefinition();
+void HandleDefinition();
 
 #endif

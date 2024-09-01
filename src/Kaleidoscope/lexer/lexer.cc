@@ -14,7 +14,11 @@
 #include <cstdio>
 #include <cstdlib>
 
-static int gettok() {
+std::string IdentifierStr;  
+double NumVal;
+int CurTok;
+
+int gettok() {
     static int LastChar = ' ';
     // 遇到空白字符串跳走
     while (std::isspace(LastChar)){

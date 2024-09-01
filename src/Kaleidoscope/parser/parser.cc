@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+std::map<char,int> BinopPrecedence;
+
 // 词法解析器
 // 上面构建了一个AST，我们需要定义解析器代码来构建
 // 实现解析类似于“x+y”的公式，将这三个字符放入AST中
@@ -18,7 +20,7 @@ auto Result = std::make_unique<BinaryExprAST>('+',std::move(LHS),std::move(RHS))
 
 
 // 基本表达式解析
-static std::unique_ptr<ExprAST> ParseNumberExpr(){
+std::unique_ptr<ExprAST> ParseNumberExpr(){
     auto Result = std::make_unique<NumberExprAST>(NumVal);
     getNextToken();             // 获取下一个token(令牌) 
     return std::move(Result);   // 将result智能指针的所有权给调用者
@@ -29,7 +31,7 @@ static std::unique_ptr<ExprAST> ParseNumberExpr(){
 // this function expects that the current token is a ‘(’ token,
 // but after parsing the subexpression, it is possible that there is no ‘)’ waiting. For example,
 // if the user types in “(4 x” instead of “(4)”, the parser should emit an error.
-static std::unique_ptr<ExprAST> ParseParenExpr(){
+std::unique_ptr<ExprAST> ParseParenExpr(){
     getNextToken(); // 消灭'('
     auto V = ParseExpression();   // 还没有实现 用于解析表达式
     if (!V) {
@@ -45,7 +47,7 @@ static std::unique_ptr<ExprAST> ParseParenExpr(){
 
 // 
 
-static std::unique_ptr<ExprAST> ParseIdentifierExpr(){
+std::unique_ptr<ExprAST> ParseIdentifierExpr(){
     std::string IdName = IdentifierStr;
     getNextToken(); // eat identifier
 
@@ -78,7 +80,7 @@ static std::unique_ptr<ExprAST> ParseIdentifierExpr(){
 
 // 
 
-static std::unique_ptr<ExprAST> ParsePrimary(){
+std::unique_ptr<ExprAST> ParsePrimary(){
     switch (CurTok) {
         default:
             return LogError("Unknown token when expecting an expression");
@@ -110,7 +112,7 @@ static int GetTokPrecedence(){
 // [*,e][*,f]和[+,g]
 
 
-static std::unique_ptr<ExprAST> ParseBinOpRHS(int ExprPrec,
+std::unique_ptr<ExprAST> ParseBinOpRHS(int ExprPrec,
                                     std::unique_ptr<ExprAST> LHS){
 
     while (true){
@@ -137,7 +139,7 @@ static std::unique_ptr<ExprAST> ParseBinOpRHS(int ExprPrec,
 }
 
 // 处理变量引用和函数调用
-static std::unique_ptr<ExprAST> ParseExpression(){
+std::unique_ptr<ExprAST> ParseExpression(){
     auto LHS = ParsePrimary();
     if(!LHS)
         return nullptr;
@@ -146,7 +148,7 @@ static std::unique_ptr<ExprAST> ParseExpression(){
 
 // prototype
 //   ::= id '(' id* ')' 
-static std::unique_ptr<PrototypeAST> ParsePrototype(){
+std::unique_ptr<PrototypeAST> ParsePrototype(){
     if(CurTok != tok_identifier)
         return LogErrorP("Expected function name in prototype");
     std::string FnName = IdentifierStr;
@@ -166,7 +168,7 @@ static std::unique_ptr<PrototypeAST> ParsePrototype(){
 }
 
 //  definition ::= 'def' prototype expression
-static std::unique_ptr<FunctionAST>  ParseDefinition(){
+std::unique_ptr<FunctionAST>  ParseDefinition(){
     getNextToken();
     auto Proto = ParsePrototype();
     if(!Proto)
@@ -177,7 +179,7 @@ static std::unique_ptr<FunctionAST>  ParseDefinition(){
 }
 
 // toplevelexpr 
-static std::unique_ptr<FunctionAST> ParseTopLevelExpr(){
+std::unique_ptr<FunctionAST> ParseTopLevelExpr(){
     if(auto E = ParseExpression()){
         // Make an anonymous proto 
         auto Proto = std::make_unique<PrototypeAST>("__anon_expr",
@@ -188,12 +190,12 @@ static std::unique_ptr<FunctionAST> ParseTopLevelExpr(){
 } 
 
 // external ::= 'extern' prototype
-static std::unique_ptr<PrototypeAST> ParseExtern(){
+std::unique_ptr<PrototypeAST> ParseExtern(){
     getNextToken();
     return ParsePrototype();
 }
 
-static void HandleDefinition(){
+void HandleDefinition(){
     if(ParseDefinition()){
         fprintf(stderr, "Parsed a function definition.\n");
     }else{
@@ -202,7 +204,7 @@ static void HandleDefinition(){
     }
 }
 
-static void HandleExtern()
+ void HandleExtern()
 {
     if(ParseExtern()){
         fprintf(stderr, "Parsed an extern\n");
@@ -213,7 +215,7 @@ static void HandleExtern()
     }
 }
 
-static void HandleTopLevelExpression(){
+ void HandleTopLevelExpression(){
     // 
     if(ParseTopLevelExpr()){
         fprintf(stderr, "Parsed a top-level expr\n");
