@@ -1,6 +1,10 @@
 # LLVM学习笔记
 
-    记录我学习LLVM的过程,前期是学习官方的教程从编写`Kaleidoscope` 开始。下面来介绍一下官网的地址：[LLVM Tutorial](https://llvm.org/docs/tutorial/index.html#building-a-jit-in-llvm) 还有一个中文版，遗憾的是没有翻译完：[用LLVM开发新语言](https://llvm-tutorial-cn.readthedocs.io/en/latest/)。我希望能够吧把官方推荐的教学资料全部学完。
+    记录我学习LLVM的过程,前期是学习官方的教程从编写`Kaleidoscope` 开始。下面来介绍一下官网的地址：[LLVM Tutorial](https://llvm.org/docs/tutorial/index.html#building-a-jit-in-llvm) 还有一个中文版 [用LLVM开发新语言](https://www.bookstack.cn/read/llvm-guide-zh/README.md)。我希望能够吧把官方推荐的教学资料全部学完。
+
+    ,,,,,,,,(一段时间后)
+
+   目前暂时停止 `Kaleidoscope` 了，因为我想系统学习一下编译原理，找到一个不戳的学习博客[编译原理学习之路 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/713322939)，推荐看中科大的《编译原理》配合学习完成[craftinginterpreters](https://github.com/GuoYaxiang/craftinginterpreters_zh?tab=readme-ov-file)
 
 ## 目录结构 && 文件
 
@@ -9,6 +13,7 @@
 ```.
 .
 ├── docx   ---> 参考资料
+|   └── craftinginterpreters_zh(submodule) ----> 编译项目
 └── src	   ---> 源码
     └── Kaleidoscope ---->Implementing a Language with LLVM
 
@@ -16,7 +21,13 @@
 
 * 文件说明
   `git.sh` : 用于推送代码的脚本
+
   * 使用方式：`bash git.sh "test"`
+* 教学视频
+  [中科大-编译原理-华保健老师](https://www.bilibili.com/video/BV16h411X7JY/?spm_id_from=333.337.search-card.all.click&vd_source=2cb22062bbd1ad0823747ec35d88c863)
+
+## craftinginterpreters
+
 
 
 ## LLVM Tutorial: Table of Contents
