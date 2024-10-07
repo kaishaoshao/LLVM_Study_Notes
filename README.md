@@ -4,7 +4,9 @@
 
     ,,,,,,,,(一段时间后)
 
-   目前暂时停止 `Kaleidoscope` 了，因为我想系统学习一下编译原理，找到一个不戳的学习博客[编译原理学习之路 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/713322939)，推荐看中科大的《编译原理》配合学习完成[craftinginterpreters](https://github.com/GuoYaxiang/craftinginterpreters_zh?tab=readme-ov-file)
+   目前暂时停止 `Kaleidoscope` 了，因为我想系统学习一下编译原理，找到一个不戳的学习博客[编译原理学习之路 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/713322939)，推荐看中科大的《编译原理》配合学习完成[craftinginterpreters](https://github.com/GuoYaxiang/craftinginterpreters_zh?tab=readme-ov-file) 
+
+   又发现一门好课，湖南大学的陈果老师的课，与科大的课相比与学生互动比较多。
 
 ## 目录结构 && 文件
 
@@ -24,11 +26,14 @@
 
   * 使用方式：`bash git.sh "test"`
 * 教学视频
+
   [中科大-编译原理-华保健老师](https://www.bilibili.com/video/BV16h411X7JY/?spm_id_from=333.337.search-card.all.click&vd_source=2cb22062bbd1ad0823747ec35d88c863)
 
+  [湖南大学计科拔尖班编译系统---陈果老师](https://www.bilibili.com/video/BV1FA4m1P7kn/?spm_id_from=333.788&vd_source=2cb22062bbd1ad0823747ec35d88c863)
+
+    学习笔记
+
 ## craftinginterpreters
-
-
 
 ## LLVM Tutorial: Table of Contents
 

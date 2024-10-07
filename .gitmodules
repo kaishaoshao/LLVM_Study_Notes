@@ -1,3 +1,6 @@
 [submodule "docx/craftinginterpreters_zh"]
 	path = docx/craftinginterpreters_zh
 	url = https://github.com/kaishaoshao/craftinginterpreters_zh.git
+[submodule "docx/dragon-book-answers"]
+	path = docx/dragon-book-answers
+	url = https://github.com/kaishaoshao/dragon-book-exercise-answers.git
