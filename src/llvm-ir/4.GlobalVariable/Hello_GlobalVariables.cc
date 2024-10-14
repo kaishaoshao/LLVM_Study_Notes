@@ -60,9 +60,6 @@ int main(int argc, char** argv) {
     llvm::BasicBlock* block = llvm::BasicBlock::Create(context, "entry", function);
     // 设置IR构建器的插入点为新创建的基本块
     builder.SetInsertPoint(block);
-    
-    // 返回
-    llvm::ConstantInt* zero = builder.getInt32(0);
 
     // 验证函数的正确性
     verifyFunction(*function);
