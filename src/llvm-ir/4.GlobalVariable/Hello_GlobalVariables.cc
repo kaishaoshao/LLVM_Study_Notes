@@ -29,31 +29,49 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
 
-using namespace llvm;
- 
-int main(int argc,char **argv){
+
+int main(int argc, char** argv) {
+    // 创建LLVM上下文，它贯穿于整个编译过程
     llvm::LLVMContext context;
+    // 创建IR构建器，用于构造LLVM IR代码
     llvm::IRBuilder<> builder(context);
     
-    llvm::Module* module = new llvm::Module("my_Module",context);
+    // 创建一个LLVM模块，用于存储IR代码
+    llvm::Module* module = new llvm::Module("my_Module", context);
     
-    module->getOrInsertGlobal("hello_GlobalVariable",llvm::Type::getInt32Ty(context));
-    llvm::GlobalVariable *globalVariable  = module->getNamedGlobal("my_GlobalVariable");
+    // 在模块中声明一个全局变量并插入到模块中
+    module->getOrInsertGlobal("hello_GlobalVariable", llvm::Type::getInt32Ty(context));
+    // 获取命名全局变量
+    llvm::GlobalVariable* globalVariable = module->getNamedGlobal("hello_GlobalVariable");
+    // 设置全局变量的链接类型
     globalVariable->setLinkage(llvm::GlobalValue::CommonLinkage);
+    // 设置全局变量的对齐方式
     globalVariable->setAlignment(llvm::MaybeAlign(4));
 
+    // 定义空函数返回类型
     llvm::Type* voidType = llvm::Type::getVoidTy(context);
-    llvm::FunctionType* functionType = llvm::FunctionType::get(voidType,false);
-    llvm::Function* function = llvm::Function::Create(functionType,llvm::GlobalValue::ExternalLinkage,
-                                "my_Function",module);
+    // 定义函数类型
+    llvm::FunctionType* functionType = llvm::FunctionType::get(voidType, false);
+    // 创建函数，并插入到模块中
+    llvm::Function* function = llvm::Function::Create(functionType, llvm::GlobalValue::ExternalLinkage,
+                                                     "my_Function", module);
 
-    llvm::BasicBlock *block = llvm::BasicBlock::Create(context,"entry",function);
+    // 创建函数的基本块
+    llvm::BasicBlock* block = llvm::BasicBlock::Create(context, "entry", function);
+    // 设置IR构建器的插入点为新创建的基本块
     builder.SetInsertPoint(block);
+    
+    // 返回
+    llvm::ConstantInt* zero = builder.getInt32(0);
 
-
+    // 验证函数的正确性
     verifyFunction(*function);
-    module->print(llvm::outs(),nullptr);
+    // 打印模块的IR代码
+    module->print(llvm::outs(), nullptr);
 
     return 0;
 }
+
+
+
 
