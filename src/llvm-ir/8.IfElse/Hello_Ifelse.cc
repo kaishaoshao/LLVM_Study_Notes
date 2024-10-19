@@ -38,7 +38,45 @@ int main(int argc,char **argv)
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder(context);
     
-    llvm
+    llvm::Module *module = new llvm::Module("Test.c",context);
+
+    // Add a function
+    std::vector<llvm::Type*> parameters(1,builder.getInt32Ty());
+    llvm::FunctionType* functionType = llvm::FunctionType::get(builder.getInt32Ty(),parameters,false);
+    llvm::Function* function = llvm::Function::Create(functionType,llvm::GlobalValue::ExternalLinkage,
+                                                    "Test",module);
+    // Add an argument to the function
+    llvm::Value *arg = function->getArg(0);
+    arg->setName("a");
+
+    // Add some basic blocks to function
+    llvm::BasicBlock *entryBlock = llvm::BasicBlock::Create(context,"entry",function);
+    llvm::BasicBlock *thenBlock = llvm::BasicBlock::Create(context,"if.then",function);
+    llvm::BasicBlock *elseBlock = llvm::BasicBlock::Create(context,"if.else",function);
+    llvm::BasicBlock *returnBlock = llvm::BasicBlock::Create(context,"if.end",function);
+
+    // Fill the "entry" block(1)
+    // int b
+    builder.SetInsertPoint(entryBlock);
+    llvm::Value *bPtr = builder.CreateAlloca(builder.getInt32Ty(),nullptr,"b.address");
+
+    // Fill the "entry" block(2)
+    // if (a > 33)
+    llvm::Constant *value33 = builder.getInt32(33);
+    llvm::Value *condition = builder.CreateICmpSGT(arg,value33,"compare.result");
+    builder.CreateCondBr(condition,thenBlock,elseBlock);
+ 
+
+    // Fill the "if.end" block:
+    // return b;
+    builder.SetInsertPoint(returnBlock);
+    llvm::Value *returnValue = builder.CreateLoad(builder.getInt32Ty(),bPtr,"return.value");
+    builder.CreateRet(returnValue);
+
+    // Print the IR
+    verifyFunction(*function);
+    module->print(llvm::outs(),nullptr);
+
     
     return 0;
 }
