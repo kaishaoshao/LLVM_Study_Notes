@@ -1,10 +1,11 @@
 # LLVM学习笔记
+    记录我学习LLVM的过程,前期是学习官方的教程从编写`Kaleidoscope` 开始。下面来介绍一下官网的地址：[LLVM Tutorial](https://llvm.org/docs/tutorial/index.html#building-a-jit-in-llvm) 
+    还有一个中文版 [用LLVM开发新语言](https://www.bookstack.cn/read/llvm-guide-zh/README.md)。我希望能够吧把官方推荐的教学资料全部学完。
 
-    记录我学习LLVM的过程,前期是学习官方的教程从编写`Kaleidoscope` 开始。下面来介绍一下官网的地址：[LLVM Tutorial](https://llvm.org/docs/tutorial/index.html#building-a-jit-in-llvm) 还有一个中文版 [用LLVM开发新语言](https://www.bookstack.cn/read/llvm-guide-zh/README.md)。我希望能够吧把官方推荐的教学资料全部学完。
+    (一段时间后)
 
-    ,,,,,,,,(一段时间后)
-
-   目前暂时停止 `Kaleidoscope` 了，因为我想系统学习一下编译原理，找到一个不戳的学习博客[编译原理学习之路 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/713322939)，推荐看中科大的《编译原理》配合学习完成[craftinginterpreters](https://github.com/GuoYaxiang/craftinginterpreters_zh?tab=readme-ov-file)
+   目前暂时停止 `Kaleidoscope` 了，因为我想系统学习一下编译原理，找到一个不戳的学习博客[编译原理学习之路 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/713322939)，
+   推荐看中科大的《编译原理》配合学习完成[craftinginterpreters](https://github.com/GuoYaxiang/craftinginterpreters_zh?tab=readme-ov-file)
 
    又发现一门好课，湖南大学的陈果老师的课，与科大的课相比与学生互动比较多。
 
