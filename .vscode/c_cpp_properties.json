@@ -1,11 +1,12 @@
 {
   "configurations": [
     {
-      "name": "linux-gcc-x64",
+      "name": "x86_64-pc-linux-gnu",
       "includePath": [
+        "/usr/lib/llvm-14/include",
         "${workspaceFolder}/**"
       ],
-      "compilerPath": "/usr/bin/gcc",
+      "compilerPath": "/usr/bin/clang",
       "cStandard": "${default}",
       "cppStandard": "${default}",
       "intelliSenseMode": "linux-gcc-x64",
