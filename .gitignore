@@ -53,5 +53,10 @@ dkms.conf
 
 # output
 *output*
+<<<<<<< HEAD
 .vscode
 *build*
+=======
+*build*
+.vscode
+>>>>>>> 006af6a ( home)

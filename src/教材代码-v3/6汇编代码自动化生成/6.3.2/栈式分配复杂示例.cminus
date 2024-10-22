@@ -1,0 +1,10 @@
+int main(void) {
+	int a;
+	int b;
+	int c;
+	a = 17;
+	b = 34;
+	c = a + b;
+	output(c);
+	return 0;
+}
