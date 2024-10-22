@@ -4,3 +4,5 @@
 [submodule "docx/dragon-book-answers"]
 	path = docx/dragon-book-answers
 	url = https://github.com/kaishaoshao/dragon-book-exercise-answers.git
+[submodule "src/use_llvm/llvm-hello-world"]
+	path = src/use_llvm/llvm-hello-world
