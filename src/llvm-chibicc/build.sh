@@ -1,8 +1,7 @@
 #!/bin/bash
 
-rm ./src/chibicc/chibicc
+rm chibicc
 
-cd ./src/chibicc
-make
+make -j8
 
-# bash ./scripts/run.sh
+bash ./scripts/run.sh
