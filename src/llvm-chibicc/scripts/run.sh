@@ -1,2 +1,2 @@
-./chibicc ./test/hello.c
-# rm ./chibicc
+./chibicc -S ./test/hello.c 
+rm ./chibicc 

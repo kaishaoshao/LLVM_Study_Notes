@@ -24,18 +24,20 @@ static std::unique_ptr<llvm::IRBuilder<>>  Builder;
 static void print_type(Type *type){
     if(!type)
         return;
-    std::cout<< "Type kind:" << ctypeKindString(type->kind)
-             << "align:" << type->align
+    std::cout<< "Type Kind: " << ctypeKindString(type->kind)
+             << " align: " << type->align
              << std::endl;
+    std::cout<< "*****************************"<<std::endl;
 }
 
 static void print_obj(Obj *obj){
     if(!obj)
         return;
-    std::cout<< "Type kind:" << obj->name
-             << "align:" << obj->align
+    std::cout<< "Obj  name: " << obj->name
+             << "\t  align: " << obj->align
              << std::endl;
-    print_type(obj->ty);            
+    print_type(obj->ty);    
+            
 }
 
 static void dump_obj(Obj *obj){
@@ -59,6 +61,6 @@ static llvm::LLVMContext &getLLVMContext(){
 void gen_ir(Obj *prog,const std::string &filename){
     InitializeModele(filename);
     if(DUMP_OBJ)
-        // dump_obj(prog);
+        dump_obj(prog);
     TheModule->print(llvm::outs(),nullptr);
 }
