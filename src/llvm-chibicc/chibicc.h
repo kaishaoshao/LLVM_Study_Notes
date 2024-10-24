@@ -503,6 +503,7 @@ extern char *base_file;
 
 
 #pragma GCC diagnostic ignored "-Wunused-function"
+
 // generate llvm ir
 void gen_ir(Obj *prog, const std::string &file_name);
 

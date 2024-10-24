@@ -46,8 +46,7 @@ static void dump_obj(Obj *obj){
     }
 }
 
-
-
+// 这里有问题没有想明白
 static void InitializeModele(const std::string &filename){
     TheContext = std::make_unique<llvm::LLVMContext>();
     TheModule = std::make_unique<llvm::Module>(filename, *TheContext);
@@ -58,9 +57,59 @@ static llvm::LLVMContext &getLLVMContext(){
     return TheModule->getContext();
 }
 
+// 将获取的c语言类型转换为llvm类型
+static llvm::Type *createLLVMType(Type *ty){
+    llvm::Type *llvm_type;
+    switch (ty->kind)
+    {
+    case TY_CHAR:
+        type = Builder->getInt8Ty();
+        break;
+    case TY_SHORT:
+        type = Builder->getInt16Ty();
+        break;
+    case TY_INT:
+        type = Builder->getInt32Ty();
+        break;
+    case TY_LONG:
+        type = Builder->getInt32Ty();
+        break;
+    case TY_FLOAT:
+        type = Builder->getFloatTy();
+        break;
+    case TY_DOUBLE:
+        type = Builder->getDoubleTy();
+        break;
+    default:
+        type = Builder->getInt32Ty();
+        break;
+    }
+    return llvm_type;
+}
+
+static void emit_global_var(Obj *var){
+    Type *ty = var->ty;
+    // 是函数类型
+    if(ty->kind == TY_FUNC)
+        return;
+    std::string var_name = var->name;
+    llvm::Type *llvm_type = createLLVMType(ty);
+    TheModule->getOrInsertGlobal(var_name,llvm_type);
+    
+}
+
+static void emit_data(Obj *prog){
+    // 逆序生成
+    if(!prog)
+        return;
+    emit_data(prog->next);
+    emit_global_var(prog); 
+}
+
 void gen_ir(Obj *prog,const std::string &filename){
     InitializeModele(filename);
     if(DUMP_OBJ)
         dump_obj(prog);
+    emit_data(prog);
     TheModule->print(llvm::outs(),nullptr);
 }
