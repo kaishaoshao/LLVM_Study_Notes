@@ -1,8 +1,8 @@
 LLVM_FLAGS=$(shell llvm-config --cxxflags --ldflags --system-libs --libs core)
-CFLAGS=-g -fno-common -Wall -Wno-switch -Wno-writable-strings $(LLVM_FLAGS) -fno-rtti -fuse-ld=lld
+CFLAGS=-g -fno-common -Wall -Wreturn-type  -Wno-switch -Wno-writable-strings $(LLVM_FLAGS) -fno-rtti -fuse-ld=lld
 CC=clang++
 SRCS=$(wildcard *.cpp)
-OBJS=$(SRCS:.c=.o)
+OBJS=$(SRCS: .c=.o)
 
 TEST_SRCS=$(wildcard test/*.c)
 TESTS=$(TEST_SRCS:.c=.exe)
@@ -10,7 +10,7 @@ TESTS=$(TEST_SRCS:.c=.exe)
 # Stage 1
 
 chibicc: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@  $^  $(LDFLAGS)
 
 $(OBJS): chibicc.h
 

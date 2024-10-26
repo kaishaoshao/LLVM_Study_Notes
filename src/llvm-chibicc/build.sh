@@ -1,4 +1,3 @@
 #!/bin/bash
 make -j8
-
-bash ./scripts/run.sh
+bash ./scripts/run.sh --hello 
