@@ -7,10 +7,12 @@
 推荐看中科大的《编译原理》配合学习完成[craftinginterpreters](https://github.com/GuoYaxiang/craftinginterpreters_zh?tab=readme-ov-file)
 又发现一门好课，湖南大学的陈果老师的课，与科大的课相比与学生互动比较多。
 
-新的学习资料
+新的学习资料 
 
 [llvm使用入门--飞翼剑仆](https://blog.csdn.net/Zhanglin_Wu/article/details/124942823)
-[现代编译器实习--龙芯--中科大](https://ustc-compiler-principles.github.io/textbook/#%E6%95%99%E6%9D%90%E4%BB%A3%E7%A0%81) 
+[现代编译器实习--龙芯--中科大](https://ustc-compiler-principles.github.io/textbook/#%E6%95%99%E6%9D%90%E4%BB%A3%E7%A0%81)  
+
+学习llvm后端的项目
 
 [LLVM_for_cpu0](https://github.com/P2Tree/LLVM_for_cpu0)
 
@@ -45,8 +47,8 @@
 
 * [llvm入门]([http://llvm.org/docs/GettingStarted.html\#id8](http://llvm.org/docs/GettingStarted.html#id8))
 * [LLVM IR](https://evian-zhang.github.io/llvm-ir-tutorial/)
-* [TableGen]([https://zhuanlan.zhihu.com/p/141265959](https://zhuanlan.zhihu.com/p/141265959))
-* [后端流程]([https://zhuanlan.zhihu.com/p/301653651](https://zhuanlan.zhihu.com/p/301653651))
+* [TableGen](https://zhuanlan.zhihu.com/p/141265959)
+* [后端流程](https://zhuanlan.zhihu.com/p/301653651)
 
 ## craftinginterpreters
 
