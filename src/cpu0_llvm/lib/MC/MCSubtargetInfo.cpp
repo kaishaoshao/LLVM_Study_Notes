@@ -21,6 +21,10 @@
 
 using namespace llvm;
 
+///
+bool Cpu0DisableUnreconginizedMessage = false;
+///
+
 /// Find KV in array using binary search.
 template <typename T>
 static const T *Find(StringRef S, ArrayRef<T> A) {
@@ -79,8 +83,11 @@ static void ApplyFeatureFlag(FeatureBitset &Bits, StringRef Feature,
       ClearImpliedBits(Bits, FeatureEntry->Value, FeatureTable);
     }
   } else {
-    errs() << "'" << Feature << "' is not a recognized feature for this target"
-           << " (ignoring feature)\n";
+    ///
+    if(Cpu0DisableUnreconginizedMessage) // for Cpu0
+      errs() << "'" << Feature << "' is not a recognized feature for this target"
+            << " (ignoring feature)\n";
+    ///
   }
 }
 
@@ -174,6 +181,9 @@ static FeatureBitset getFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS,
       // Set the features implied by this CPU feature, if any.
       SetImpliedBits(Bits, CPUEntry->Implies.getAsBitset(), ProcFeatures);
     } else {
+      ///
+      if(Cpu0DisableUnreconginizedMessage)
+      ///
       errs() << "'" << CPU << "' is not a recognized processor for this target"
              << " (ignoring processor)\n";
     }
@@ -186,11 +196,14 @@ static FeatureBitset getFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS,
     if (CPUEntry) {
       // Set the features implied by this CPU feature, if any.
       SetImpliedBits(Bits, CPUEntry->TuneImplies.getAsBitset(), ProcFeatures);
-    } else if (TuneCPU != CPU) {
+    }
+    /// 
+    else if (TuneCPU != CPU && CPU != "mips32r2") {
       errs() << "'" << TuneCPU << "' is not a recognized processor for this "
              << "target (ignoring processor)\n";
     }
-  }
+    ///
+  } 
 
   // Iterate through each feature
   for (const std::string &Feature : Features.getFeatures()) {
@@ -205,17 +218,26 @@ static FeatureBitset getFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS,
 
   return Bits;
 }
-bool Cpu0Disable
+
 
 void MCSubtargetInfo::InitMCProcessorInfo(StringRef CPU, StringRef TuneCPU,
                                           StringRef FS) {
   FeatureBits = getFeatures(CPU, TuneCPU, FS, ProcDesc, ProcFeatures);
   FeatureString = std::string(FS);
+///
+#if 1 
+  if (TargetTriple.getArch() == llvm::Triple::cpu0 ||
+      TargetTriple.getArch() == llvm::Triple::cpu0el)
+    Cpu0DisableUnreconginizedMessage = true;
+#endif
+///
 
   if (!TuneCPU.empty())
     CPUSchedModel = &getSchedModelForCPU(TuneCPU);
   else
     CPUSchedModel = &MCSchedModel::Default;
+
+
 }
 
 void MCSubtargetInfo::setDefaultFeatures(StringRef CPU, StringRef TuneCPU,
@@ -284,8 +306,12 @@ FeatureBitset MCSubtargetInfo::ToggleFeature(StringRef Feature) {
                      ProcFeatures);
     }
   } else {
+    ///
+    if(!Cpu0DisableUnreconginizedMessage) //For Cpu0
+    ///
     errs() << "'" << Feature << "' is not a recognized feature for this target"
            << " (ignoring feature)\n";
+   
   }
 
   return FeatureBits;
@@ -311,12 +337,17 @@ bool MCSubtargetInfo::checkFeatures(StringRef FS) const {
 const MCSchedModel &MCSubtargetInfo::getSchedModelForCPU(StringRef CPU) const {
   assert(llvm::is_sorted(ProcDesc) &&
          "Processor machine model table is not sorted");
-
   // Find entry
   const SubtargetSubTypeKV *CPUEntry = Find(CPU, ProcDesc);
 
   if (!CPUEntry) {
     if (CPU != "help") // Don't error if the user asked for help.
+///
+#if 1
+       if (TargetTriple.getArch() != llvm::Triple::cpu0 &&
+           TargetTriple.getArch() != llvm::Triple::cpu0el)
+#endif
+///      
       errs() << "'" << CPU
              << "' is not a recognized processor for this target"
              << " (ignoring processor)\n";
