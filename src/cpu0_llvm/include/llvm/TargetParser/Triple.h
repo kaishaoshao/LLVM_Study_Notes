@@ -70,7 +70,7 @@ public:
     mips64el,       // MIPS64EL: mips64el, mips64r6el, mipsn32el, mipsn32r6el
     ///
     cpu0,
-    cpuel,
+    cpu0el,
     ///
     msp430,         // MSP430: msp430
     ppc,            // PPC: powerpc

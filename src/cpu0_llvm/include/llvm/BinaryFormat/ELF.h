@@ -615,7 +615,7 @@ enum {
 enum {
     EF_CPU0_NOREORDER = 0x00000001, // 表示不重新排序指令。
     EF_CPU0_PIC       = 0x00000002, // 表示生成位置无关代码
-    EF_CPU0_ARCH      = 0x50000000, // CPU0的32位指令集，这个值可能是根据Linux的ELF规范来的。
+    EF_CPU0_ARCH_32   = 0x50000000, // CPU0的32位指令集，这个值可能是根据Linux的ELF规范来的。
     EF_CPU0_ARCH      = 0xf0000000, // 是一个掩码（mask），用于应用EF_CPU0_ARCH变体。
 };
 

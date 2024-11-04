@@ -1303,7 +1303,7 @@ StringRef ELFObjectFile<ELFT>::getFileFormatName() const {
     case ELF::EM_MIPS:
       return "elf32-mips";
     case ELF::EM_CPU0:
-      return "elf32-cpu0"
+      return "elf32-cpu0";
     case ELF::EM_MSP430:
       return "elf32-msp430";
     case ELF::EM_PPC:
