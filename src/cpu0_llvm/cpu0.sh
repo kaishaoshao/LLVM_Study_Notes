@@ -13,6 +13,7 @@ cp ./cpu0_llvm/lib/MC/MCSubtargetInfo.cpp ./llvm/lib/MC/
 cp ./cpu0_llvm/lib/Target/Cpu0/ ./llvm/lib/Target -rf
 cp ./cpu0_llvm/CMakeLists.txt ./llvm/
 
+mkdir build
 cd build
 rm * -rf
 cmake -DCMAKE_BUILD_TYPE=Debug         \
