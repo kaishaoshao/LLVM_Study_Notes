@@ -56,3 +56,5 @@ dkms.conf
 .vscode
 *build*
 llvm/
+
+.codegpt
