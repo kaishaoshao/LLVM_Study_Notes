@@ -12,7 +12,14 @@ Cpu0 是一个简化的 32 位 RISC 架构，主要用于教学和研究。其�
 
 接入 Cpu0 架构的核心步骤包括：
 
-### **2.1 目标描述文件（.td 文件）**
+### 2.1Cpu0 backend machine ID and relocation records
+
+* 重定位文件
+
+Cpu0.def  : llvm/include/llvm/BinaryFormat/ELFRelocs/Cpu0.def
+
+
+### **2.2 目标描述文件（.td 文件）**
 
 LLVM 使用 TableGen 工具生成目标描述文件，主要包括：
 
@@ -21,7 +28,7 @@ LLVM 使用 TableGen 工具生成目标描述文件，主要包括：
 * **Cpu0RegisterInfo.td** ：定义寄存器及其分类，如通用寄存器 `CPURegs` 和特殊寄存器 `SR`。
 * **Cpu0Schedule.td** ：定义指令调度策略，优化指令执行顺序。
 
-### **2.2 目标机器描述**
+### **2.3 目标机器描述**
 
 * **Cpu0TargetMachine.cpp** ：定义目标机器的接口，包括目标特性和优化选项**17**。
 * **Cpu0Subtarget.cpp** ：定义目标子特性，如指令集扩展和硬件特性。
