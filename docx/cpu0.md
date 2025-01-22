@@ -46,27 +46,43 @@ Cpu0 的寄存器分为两类：**通用寄存器** 和 **特殊寄存器**。
 
 Cpu0 的指令格式固定为 32 位，分为以下几种类型：
 
-#### **3.1 R 型指令（寄存器-寄存器）**
+* opcode : 操作码，用于标识指令的类型
+* ra           : 目标寄存器，只用于3寄存器指令
+* rb           :  源寄存器
+* rc           ：源寄存器
+* cx           ：立即数
 
-- **格式**：`opcode(6) | rs(5) | rt(5) | rd(5) | shamt(5) | funct(6)`
+#### **3.1 A 型指令（寄存器-寄存器）**
+
+- **格式**：`opcode(8) | ra(4) | rb(4) | rc(4) | cx(12)`
+
 - **示例**：
-  - `ADD rd, rs, rt`：将 `rs` 和 `rt` 相加，结果存入 `rd`。
-  - `SUB rd, rs, rt`：将 `rs` 减去 `rt`，结果存入 `rd`。
+  
+  -  
+  
+- td定义
+
+  ```cpp
+  class FA<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern,
+  		InstrItinClass itin>: Cp
+  ```
+
+  
 
 #### **3.2 I 型指令（立即数）**
 
 - **格式**：`opcode(6) | rs(5) | rt(5) | imm(16)`
 - **示例**：
-  - `ADDI rt, rs, imm`：将 `rs` 和立即数 `imm` 相加，结果存入 `rt`。
-  - `LW rt, offset(rs)`：从内存地址 `rs + offset` 加载数据到 `rt`。
-  - `SW rt, offset(rs)`：将 `rt` 的值存储到内存地址 `rs + offset`。
+  - 
 
 #### **3.3 J 型指令（跳转）**
 
-- **格式**：`opcode(6) | address(26)`
+- **格式**：`opcode(8) | cx(24)`
+
 - **示例**：
-  - `J target`：无条件跳转到目标地址 `target`。
-  - `JAL target`：跳转到目标地址 `target`，并将返回地址保存到 `LR`。
+  - 
+  
+    
 
 ---
 
@@ -148,6 +164,10 @@ main:
 Cpu0 是一个简化的 32 位 RISC 架构，适合用于教学和 LLVM 后端开发的学习。它的指令集和寄存器设计简单明了，同时涵盖了现代处理器的核心概念。通过实现 Cpu0 后端，可以深入理解 LLVM 的工作原理和目标代码生成的过程。
 
 ## tableGen
+
+
+
+
 
 ### **Cpu0 TableGen 文件**
 
