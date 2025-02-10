@@ -215,3 +215,15 @@ LLVM IR --------> ( 指令选择 )--------> 指令调度1 -------> 编译优化-
 
 
 ## 指令选择
+
+指令选择的工作是将LLVM IR 转换成目标相关的后端IR表达MachineInstr。
+
+### 流程
+
+LLVM IR -----> SelectionDAGBuilder ------{ SelectionDAG } ---->[ SelectionDAGsel | TargetLowering ] ------|
+
+    ---------> { Machine SelectionDAG} --------> ScheduleDAGSDNode ------------> MachineInstr
+
+从IR结构上区分，指令选择包含3个阶段：SelcctionDAG构建、Machine SelectionDAG匹配目标相关的指令操作和
+
+MachineInstr生成
