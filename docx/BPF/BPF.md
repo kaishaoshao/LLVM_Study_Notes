@@ -51,8 +51,6 @@ BPF 的指令集是一种基于寄存器的虚拟机指令集，每条指令长�
 
 * 支持 32 位子寄存器操作（如 `ADD32`、`SUB32`），减少类型扩展指令。
 
-
-
 ---
 
 ### 2. **BPF 寄存器**
@@ -199,8 +197,6 @@ def BPF_C : CallingConv<[
 ]>;
 ```
 
-
-
 ## LLVM添加一个新后端
 
 由于llvm的结构化设计和实现，当为它添加新的后端是一般来书只需要对后端指令集、ABI(二进制接口接口)进行处理即可，但是现实情况是，一些后端会定义独有的数据类型、指令等，LLVM框架通常不能处理，此时需要添加特殊处理功能，否则会出错，此外，为了生成高质量的后端代码，LLVM还会针对后端经销一些特有的优化。
@@ -213,7 +209,6 @@ LLVM IR --------> ( 指令选择 )--------> 指令调度1 -------> 编译优化-
 
 （ ）[ ] 是添加新后端的必要过程 ，其他是优化是影响最后生成代码质量
 
-
 ## 指令选择
 
 指令选择的工作是将LLVM IR 转换成目标相关的后端IR表达MachineInstr。
@@ -224,6 +219,70 @@ LLVM IR -----> SelectionDAGBuilder ------{ SelectionDAG } ---->[ SelectionDAGsel
 
     ---------> { Machine SelectionDAG} --------> ScheduleDAGSDNode ------------> MachineInstr
 
-从IR结构上区分，指令选择包含3个阶段：SelcctionDAG构建、Machine SelectionDAG匹配目标相关的指令操作和
+从IR结构上区分，指令选择包含3个阶段：SelcctionDAG构建、Machine SelectionDAG匹配目标相关的指令操作和MachineInstr生成
 
-MachineInstr生成
+### LLVM IR
+
+LLVM IR 是 LLVM编译器的中间表示，他是一种与平台无关的、高级的伪汇编语言。LLVM IR 是编译器前端生成的中间结果，用于表示程序的逻辑，LLVM IR的设计目标是简洁、易于优化，并且能够高效地转换为目标机器代码。
+
+### SelectionDAGBuilder
+
+作用是将LLVM IR转换为一个有向无环图(DAG)结构，称为SelectionDAG,是一种中间表示，用于更直观地表示指令之间的依赖关系和操作。
+
+### SelectionDAG
+
+一个有向无环图，用于表示程序的指令流和数据依赖关系，每个节点(SDNode)表示一个操作(如加法、乘法、加载、存储等)，边表示依赖关系。与目标无关属性。
+
+### TargetLowering 和 SelectionDAGSel
+
+TargetLowering和SelectionDAGSel(DAG指令选择)是将目标无关的SelectionDAG转换的目标机器指令的过程。
+
+* TargetLowering:
+  作用： 将目标无关的SelectionDAG节点转换为目标架构支持的操作。例如，某些复杂的操作可能需要分解为多个目标架构支持的简单操作。
+  输入：目标无关SelectionDAG
+  输出：目标相关的 SelectionDAG (Machine SelectionDAG)
+  主要任务：
+  * 操作分解： 将复杂的操作分解为目标架构支持的简单操作
+  * 指令选择： 根据目标架构的特性，选择合适的指令来实现每个操作
+* SelectionDAGSel:
+  作用 ：将目标相关的SelectionDAG转换为MachineInstr
+  输入 ：目标相关的SelectionDAG
+  输出：MachineInstr列表
+  主要任务：
+  * 指令匹配：根据目标架构的指令集，将SelectionDAG中的节点匹配到具体的机器指令
+  * 指令生成：生成目标架构的机器指令
+
+### Machine SelectionDAG
+
+Machine SelectionDAG 是经过TargetLowering 处理后的目标相关的SelectionDAG。已经考虑了目标架构的属性，但是任为一个图结构，需要进一步转换为线性的机器指令序列。
+
+### ScheduleDAGSDNode
+
+ScheduleDAGDNode是对Mahcine SelectionDAG进行指令调度的阶段。指令调度的目的是优化指令的执行顺序，以提高目标机器的性能。
+
+* 输入： Machine SelectionDAG
+* 输出 ： 有序的MachineInstr 列表
+* 主要任务：
+  * 依赖分析：分析指令之间的依赖关系，确保指令的执行顺序符合依赖关系
+  * 调度策略：根据目标架构的特性()
+  * 指令排序：将SelectionDAG中的节点转换为线性的MachineInstr列表
+
+### MachineInstr
+
+MachineInstr是LLVM后端代码生成的最终结果，表示目标机器的指令，每个MachieInstr对应一条目标机器的指令。
+
+* 输入：有序的MachineInstr列表
+* 输出：目标机器代码
+* 主要任务：
+
+  * 寄存器分配：为指令中的变量分配目标机器的寄存器
+  * 指令编码：将MachineInstr转换为二进制机器代码
+  * 代码生成：生成最终的目标机器代码
+
+### 总结
+
+1. LLVM IR 被转换为目标无关的SelectionDAG
+2. TargetLowering 将目标无关的 SelectionDAG转换为目标相关的Machine SelectionDAG
+3. SelectionDAGSel 将目标相关的 Machine SelectionDAG 转换为MachineInstr
+4. ScheduleDAGSDNode 对MachineInstr进行指令调度，生成有序的指令序列。
+5. 最终MachineInstr被转换为目标机器代码
