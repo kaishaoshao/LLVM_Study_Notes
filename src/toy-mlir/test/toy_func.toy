@@ -1,0 +1,9 @@
+def func(var a, var b) {
+  return a + b;
+}
+
+def main() {
+  var a = 1;
+  var b = 2;
+  print(func(a, b));
+}

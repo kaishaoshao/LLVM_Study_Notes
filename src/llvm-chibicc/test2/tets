@@ -1,0 +1,61 @@
+	.text
+	.file	"common.c"
+	.globl	assert                          # -- Begin function assert
+	.p2align	4, 0x90
+	.type	assert,@function
+assert:                                 # @assert
+	.cfi_startproc
+# %bb.0:
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register %rbp
+	subq	$16, %rsp
+	movl	%edi, -4(%rbp)
+	movl	%esi, -8(%rbp)
+	movq	%rdx, -16(%rbp)
+	movl	-4(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	jne	.LBB0_2
+# %bb.1:
+	movq	-16(%rbp), %rsi
+	movl	-8(%rbp), %edx
+	leaq	.L.str(%rip), %rdi
+	movb	$0, %al
+	callq	printf@PLT
+	jmp	.LBB0_3
+.LBB0_2:
+	movq	-16(%rbp), %rsi
+	movl	-4(%rbp), %edx
+	movl	-8(%rbp), %ecx
+	leaq	.L.str.1(%rip), %rdi
+	movb	$0, %al
+	callq	printf@PLT
+	movl	$1, %edi
+	callq	exit@PLT
+.LBB0_3:
+	addq	$16, %rsp
+	popq	%rbp
+	.cfi_def_cfa %rsp, 8
+	retq
+.Lfunc_end0:
+	.size	assert, .Lfunc_end0-assert
+	.cfi_endproc
+                                        # -- End function
+	.type	.L.str,@object                  # @.str
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.L.str:
+	.asciz	"%s => %d\n"
+	.size	.L.str, 10
+
+	.type	.L.str.1,@object                # @.str.1
+.L.str.1:
+	.asciz	"%s => %d expected but got %d\n"
+	.size	.L.str.1, 30
+
+	.ident	"clang version 20.0.0git (https://github.com/llvm/llvm-project.git 983869a0365c685049ea9015a2b4d7241b98fd4f)"
+	.section	".note.GNU-stack","",@progbits
+	.addrsig
+	.addrsig_sym printf
+	.addrsig_sym exit

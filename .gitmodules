@@ -6,3 +6,6 @@
 	url = https://github.com/kaishaoshao/dragon-book-exercise-answers.git
 [submodule "src/use_llvm/llvm-hello-world"]
 	path = src/use_llvm/llvm-hello-world
+[submodule "src/LLVMPascalCompiler"]
+	path = src/LLVMPascalCompiler
+	url = git@github.com:kaishaoshao/LLVMPascalCompiler.git
