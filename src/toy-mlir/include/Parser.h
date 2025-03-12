@@ -19,6 +19,7 @@ public:
 
 private:
 
+Lexer &lexer;
 
 
 };
