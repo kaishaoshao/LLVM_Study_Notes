@@ -1,5 +1,5 @@
-#ifndef   __LEXER_H__
-#define   __LEXER_H__
+#ifndef   __TOY_LEXER_H__
+#define   __TOY_LEXER_H__
 
 #include "llvm/ADT/StringRef.h"
 
@@ -184,6 +184,8 @@ private:
         
         // 一行结束 更新
         if(curLineBuffer.empty())
+            curLineBuffer = readNextLine();
+        if (nextChar == '\n')
         {
             ++curLine;
             curCol = 0;
@@ -220,4 +222,4 @@ private:
 
 } // namespace toy
 
-#endif  // __LEXER_H__
+#endif  // __TOY_LEXER_H__
