@@ -35,6 +35,7 @@ public:
         Expr_Num,     // 数字字面量
         Expr_Literal, // 数组字面量
         Expr_Var,     // 变量引用
+        Expr_BinOp,   // 二元运算
         Expr_Call,    // 函数调用
         Expr_Print,   // 打印节点
     };      
@@ -69,7 +70,7 @@ private:
 
 public:
     NumberExprAST(Location loc, double val) : 
-                ExprAST(Expr_Num, std::move(loc), val(val)) {}
+                ExprAST(Expr_Num, std::move(loc)), val(val) {}
     /// 获取数值
     double getValue() { return val; }
     /// llvm风格类型检查（用于安全向下转型）
@@ -153,40 +154,139 @@ public:
 
 /// 返回语句节点（如return 42;）
 class ReturnExprAST : public ExprAST {
+private:
+    std::optional<std::unique_ptr<ExprAST>> expr; // 可选返回值表达式
 
+public:
+    ReturnExprAST(Location loc, std::optional<std::unique_ptr<ExprAST>> expr) :
+        ExprAST(Expr_Return, std::move(loc)), expr(std::move(expr)) {}
+
+    /// 获取返回值表达式 （若无返回值为空）
+    std::optional<ExprAST *> getExpr() { 
+        return expr.has_value() ? expr->get() : std::nullopt; 
+    }
+
+    static bool classof(const ExprAST *c) {
+        return c->getKind() == Expr_Return;
+    }
 };
 
 
 /// 二元运算节点 (如a+b)
 class BinaryExprAST : public ExprAST {
+private:
+    char op;                              // 操作符
+    std::unique_ptr<ExprAST> lhs, rhs;    // 左右操作数
+public:
+    BinaryExprAST(Location loc, char op, std::unique_ptr<ExprAST> lhs,
+                  std::unique_ptr<ExprAST> rhs) : 
+                  ExprAST(Expr_BinOp, std::move(loc)), op(op), 
+                  lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+                
+    /// 获取操作符              
+    char getOp() { return op; }
+    /// 获取左操作数
+    ExprAST *getLHS() { return lhs.get(); }
+    /// 获取右操作数
+    ExprAST *getRHS() { return rhs.get(); }
+
+    static bool classof(const ExprAST *c) {
+        return c->getKind() == Expr_BinOp;
+    }
 
 };
 
 
 /// 函数调用节点（如multiply(a, b)）
 class CallExprAST : public ExprAST {
+private:
+    std::string callee; // 被调用函数名
+    std::vector<std::unique_ptr<ExprAST>> args; // 参数列表
+
+public:
+    CallExprAST(Location loc, const std::string &callee, 
+            std::vector<std::unique_ptr<ExprAST>> args)
+            : ExprAST(Expr_Call, std::move(loc)), callee(callee),
+            args(std::move(args)) {}
+    /// 获取被调用函数
+    llvm::StringRef getCallee() { return callee; }
+    /// 获取参数列表
+    llvm::ArrayRef<std::unique_ptr<ExprAST>> getArgs() { return args; }
+
+    static bool classof(const ExprAST *c) {
+        return c->getKind() == Expr_Call;
+    }
 
 };
 
 /// 打印语句节点（如print(c);）
 class PrintExprAST: public ExprAST {
+private:
+    std::unique_ptr<ExprAST> arg;
 
+public:
+    PrintExprAST(Location loc, std::unique_ptr<ExprAST> arg) :
+        ExprAST(Expr_Print, std::move(loc)), arg(std::move(arg)) {}
+
+    /// 获取打印内容
+    ExprAST *getArg() { return arg.get(); }
+
+    static bool classof(const ExprAST *c) {
+        return c->getKind() == Expr_Print;
+    }
 };
 
 
 /// 函数原型节点 (定义函数签名)
 class PrototypeAST {
+private:
+    Location loc;                 // 函数定义位置
+    std::string name;             // 函数名
+    std::vector<std::unique_ptr<VarDeclExprAST>> args; // 参数列表
+public:
+    PrototypeAST(Location loc, llvm::StringRef name,
+                  std::vector<std::unique_ptr<VarDeclExprAST>> args) :
+                  loc(std::move(loc)), name(name), args(std::move(args)) {}
 
+    /// 获取函数定义位置
+    const Location &getLoc() { return loc; }
+    /// 获取函数名
+    llvm::StringRef getName() { return name; }
+    /// 获取参数列表
+    llvm::ArrayRef<std::unique_ptr<VarDeclExprAST>> getArgs() { return args; }
 };
+
 
 /// 函数定义节点（原型+函数体）
 class FunctionAST {
+private:
+    std::unique_ptr<PrototypeAST> proto;  // 函数原型
+    std::unique_ptr<ExprAST> body;        // 函数体  
 
+public:
+    FunctionAST(std::unique_ptr<PrototypeAST> proto,
+                std::unique_ptr<ExprAST> body) :
+                proto(std::move(proto)), body(std::move(body)) {}
+    
+    /// 获取函数原型
+    PrototypeAST *getProto() { return proto.get(); }
+    /// 获取函数体
+    ExprAST *getBody() { return body.get(); }
+    
 };
 
 /// 模块节点（包含多个函数定义）
 class ModuleAST {
+private:
+    std::vector<std::unique_ptr<FunctionAST>> functions;
 
+public:
+    ModuleAST(std::vector<std::unique_ptr<FunctionAST>> functions) :
+        functions(std::move(functions)) {}
+
+    /// 迭代器
+    auto begin() { return functions.begin(); }
+    auto end()  {   return functions.end(); }
 };
 
 /// 模块AST调试输出函数声明
