@@ -8,6 +8,7 @@
 
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ADT/Twine.h>
+#include <llvm/ADT/TypeSwitch.h>
 
 using namespace toy;
 
@@ -29,7 +30,7 @@ void dump(ModuleAST *node); // 模块入口点
 private:
     // 各类型节点的转储方法
     void dump(const VarType &type);
-    void dump(VarDeclExprAST *VarDecl);
+    void dump(VarDeclExprAST *varDecl);
     void dump(ExprAST *expr);
     void dump(ExprASTList *exprList);
     void dump(NumberExprAST *num);
@@ -63,30 +64,40 @@ static std::string loc(T *node) {
 }
 
 
-// 缩进宏： 进入作用域增加缩进，离开时自动恢复
-#define INDENT()                                             \
-        Indent level_(curIndent);     /* RAII对象管理缩进 */   \  
-        index();                      /* 输出当前缩进空格*/
-
+// 缩进宏：进入作用域增加缩进，离开时自动恢复
+#define INDENT()                                                               \
+  Indent level_(curIndent); /* RAII对象管理缩进 */                              \
+  indent();
 
 /// 表达式动态分发处理：根据具体子类型调用对应的转储方法
 void ASTDumper::dump(ExprAST *expr) {
+    // 不理解用法
+    llvm::TypeSwitch<ExprAST *>(expr)
+    .Case<BinaryExprAST, CallExprAST, LiteralExprAST, NumberExprAST,
+          PrintExprAST, ReturnExprAST, VarDeclExprAST, VariableExprAST>(
+        [&](auto *node) { this->dump(node); }) // 类型匹配处理
+    .Default([&](ExprAST *) { // 未知表达式类型的处理
+      INDENT();
+      llvm::errs() << "<未知表达式类型，种类 " << expr->getKind() << ">\n";
+    });
 
+}
+
+// 变量声明处理： 输出变量名、类型和位置，然后处理初始化表达式
+void ASTDumper::dump(VarDeclExprAST *varDecl){
+    INDENT();
+    llvm::errs() << "变量声明 " << varDecl->getName();
+    dump(varDecl->getType());                     // 输出变量类型信息      
+    llvm::errs() << " " << loc(varDecl) << "\n";
+    dump(varDecl->getInitVal());                  // 递归处理初始化表达式
 }
 
 
 void ASTDumper::dump(const VarType &type){
-
+    
 }
 
-void ASTDumper::dump(VarDeclExprAST *VarDecl){
-
-}
-
-void ASTDumper::dump(ExprASTList *exprList){
-
-}
-
+/// 数字字面量处理： 直接输出数值和位置
 void ASTDumper::dump(NumberExprAST *num){
 
 }
@@ -110,6 +121,12 @@ void ASTDumper::dump(BinaryExprAST *node){
 void ASTDumper::dump(CallExprAST *node){
 
 }
+
+/// 代码块处理： 输出块内所有表达式
+void ASTDumper::dump(ExprASTList *exprList){
+
+}
+
 
 void ASTDumper::dump(PrintExprAST *node){
 
