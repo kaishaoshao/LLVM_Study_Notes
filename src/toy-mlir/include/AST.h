@@ -163,7 +163,9 @@ public:
 
     /// 获取返回值表达式 （若无返回值为空）
     std::optional<ExprAST *> getExpr() { 
-        return expr.has_value() ? expr->get() : std::nullopt; 
+        if(expr.has_value())
+            return expr->get();
+        return std::nullopt;
     }
 
     static bool classof(const ExprAST *c) {
