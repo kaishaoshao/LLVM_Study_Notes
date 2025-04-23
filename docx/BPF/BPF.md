@@ -1,291 +1,323 @@
-# **Cpu0概述**
+# BPF概序
 
-**Cpu0** 是一个用于教学和学习的简化处理器架构，通常用于 LLVM 后端开发的教程中。它的设计目标是简单易懂，同时涵盖现代处理器的核心概念。以下是 **Cpu0 指令架构** 的详细介绍：
+## BPF 信息
 
-## 概述
+### 1. **BPF 指令集**
 
-### **1. Cpu0 架构概述**
+BPF 的指令集是一种基于寄存器的虚拟机指令集，每条指令长度为 64 位，采用固定格式。指令格式如下：
 
-- **位宽**：32 位架构（支持 32 位寄存器和地址空间）。
-- **字节序**：支持大端（`cpu0`）和小端（`cpu0el`）。
-- **寄存器**：16 个通用寄存器（GPR）和少量特殊寄存器。
-- **指令集**：精简指令集（RISC），指令格式固定。
-- **内存访问**：支持加载（Load）和存储（Store）指令。
-- **分支和跳转**：支持条件分支和无条件跳转。
+复制
 
----
-
-### **2. 寄存器**
-
-Cpu0 的寄存器分为两类：**通用寄存器** 和 **特殊寄存器**。
-
-#### **2.1 通用寄存器（GPR）**
-
-- **数量**：16 个（32 位）。
-- **命名**：
-  - `ZERO`：始终为 0，用于常量操作。
-  - `AT`：汇编临时寄存器。
-  - `V0`, `V1`：函数返回值寄存器。
-  - `A0`, `A1`：函数参数寄存器。
-  - `T0`, `T1`, `T9`：临时寄存器。
-  - `S0`, `S1`：保存寄存器（跨函数调用保持不变）。
-  - `GP`：全局指针寄存器。
-  - `FP`：帧指针寄存器。
-  - `SP`：栈指针寄存器。
-  - `LR`：链接寄存器（用于函数返回地址）。
-  - `SW`：状态寄存器。
-
-#### **2.2 特殊寄存器**
-
-- **PC**：程序计数器，指向当前指令地址。
-- **EPC**：异常程序计数器，用于异常处理。
-
----
-
-### **3. 指令格式**
-
-Cpu0 的指令格式固定为 32 位，分为以下几种类型：
-
-#### **3.1 R 型指令（寄存器-寄存器）**
-
-- **格式**：`opcode(6) | rs(5) | rt(5) | rd(5) | shamt(5) | funct(6)`
-- **示例**：
-  - `ADD rd, rs, rt`：将 `rs` 和 `rt` 相加，结果存入 `rd`。
-  - `SUB rd, rs, rt`：将 `rs` 减去 `rt`，结果存入 `rd`。
-
-#### **3.2 I 型指令（立即数）**
-
-- **格式**：`opcode(6) | rs(5) | rt(5) | imm(16)`
-- **示例**：
-  - `ADDI rt, rs, imm`：将 `rs` 和立即数 `imm` 相加，结果存入 `rt`。
-  - `LW rt, offset(rs)`：从内存地址 `rs + offset` 加载数据到 `rt`。
-  - `SW rt, offset(rs)`：将 `rt` 的值存储到内存地址 `rs + offset`。
-
-#### **3.3 J 型指令（跳转）**
-
-- **格式**：`opcode(6) | address(26)`
-- **示例**：
-  - `J target`：无条件跳转到目标地址 `target`。
-  - `JAL target`：跳转到目标地址 `target`，并将返回地址保存到 `LR`。
-
----
-
-### **4. 指令集**
-
-Cpu0 的指令集包括以下几类：
-
-#### **4.1 算术和逻辑指令**
-
-- **ADD**：加法。
-- **SUB**：减法。
-- **ADDI**：加立即数。
-- **AND**：按位与。
-- **OR**：按位或。
-- **XOR**：按位异或。
-
-#### **4.2 内存访问指令**
-
-- **LW**：从内存加载字（32 位）。
-- **SW**：存储字到内存。
-
-#### **4.3 分支和跳转指令**
-
-- **BEQ**：如果相等则分支。
-- **BNE**：如果不相等则分支。
-- **J**：无条件跳转。
-- **JAL**：跳转并链接（用于函数调用）。
-
-#### **4.4 特殊指令**
-
-- **NOP**：空操作。
-- **RET**：函数返回（跳转到 `LR` 中的地址）。
-
----
-
-### **5. 内存模型**
-
-- **地址空间**：32 位地址空间（4GB）。
-- **对齐**：字（32 位）必须按 4 字节对齐。
-- **栈**：栈指针（`SP`）指向栈顶，栈向低地址增长。
-
----
-
-### **6. 异常处理**
-
-- **EPC**：保存异常发生时的指令地址。
-- **SW**：状态寄存器，包含异常状态信息。
-
----
-
-### **7. 示例代码**
-
-以下是一个简单的 Cpu0 汇编程序示例：
-
-```assembly
-    .text
-    .globl main
-main:
-    ADDI $t0, $zero, 10      # t0 = 10
-    ADDI $t1, $zero, 20      # t1 = 20
-    ADD  $t2, $t0, $t1       # t2 = t0 + t1
-    SW   $t2, 0($sp)         # 将 t2 存储到栈中
-    LW   $t3, 0($sp)         # 从栈中加载数据到 t3
-    RET                      # 返回
+```
+| 8 bits | 4 bits | 4 bits | 16 bits | 32 bits |
+|--------|--------|--------|---------|---------|
+|  opcode |  dest  |  src   |  offset | immediate |
 ```
 
+* **opcode** ：操作码，指定指令的类型（如加载、存储、算术运算等）。
+* **dest** ：目标寄存器（通常为 R0-R10）。
+* **src** ：源寄存器（通常为 R0-R10）。
+* **offset** ：偏移量，用于内存访问或跳转指令。
+* **immediate** ：立即数，用于常量操作。
+
+#### 主要指令类型
+
+1. **加载/存储指令** ：
+
+* 从内存加载数据到寄存器（`LD`、`LDX`）。
+* 将寄存器数据存储到内存（`ST`、`STX`）。
+
+1. **算术/逻辑指令** ：
+
+* 加法（`ADD`）、减法（`SUB`）、乘法（`MUL`）、除法（`DIV`）。
+* 位操作（`AND`、`OR`、`XOR`、`LSH`、`RSH`）。
+* 取反（`NEG`）。
+
+1. **跳转指令** ：
+
+* 无条件跳转（`JA`）。
+* 条件跳转（`JEQ`、`JNE`、`JGT`、`JLT`、`JGE`、`JLE`）。
+* 函数调用（`CALL`）和返回（`EXIT`）。
+
+1. **辅助函数调用** ：
+
+* 通过 `CALL` 指令调用内核提供的辅助函数（如 `bpf_map_lookup_elem`、`bpf_trace_printk`）。
+
+1. **原子操作指令** ：
+
+* 支持原子操作（如 `ATOMIC_ADD`、`ATOMIC_OR`），用于并发场景。
+
+1. **32 位子寄存器操作** ：
+
+* 支持 32 位子寄存器操作（如 `ADD32`、`SUB32`），减少类型扩展指令。
+
 ---
 
-### **8. Cpu0 在 LLVM 中的实现**
+### 2. **BPF 寄存器**
 
-在 LLVM 中，Cpu0 的后端实现包括：
+BPF 虚拟机有 11 个通用寄存器（R0-R10）和一个程序计数器（PC）。寄存器的作用如下：
 
-- **目标描述文件（.td 文件）**：定义指令集、寄存器、调度信息等。
-- **C++ 代码**：实现指令选择、寄存器分配、代码生成等。
-- **测试用例**：验证后端的正确性。
+* **R0** ：用于存储函数返回值或操作结果。
+* **R1-R5** ：用于传递函数参数。
+* **R6-R9** ：通用寄存器，可用于临时存储数据。
+* **R10** ：栈帧指针（只读），用于访问栈上的数据。
 
-### **9. 总结**
+---
 
-Cpu0 是一个简化的 32 位 RISC 架构，适合用于教学和 LLVM 后端开发的学习。它的指令集和寄存器设计简单明了，同时涵盖了现代处理器的核心概念。通过实现 Cpu0 后端，可以深入理解 LLVM 的工作原理和目标代码生成的过程。
+### 3. **BPF 内存模型**
 
-## tableGen
+BPF 的内存模型包括：
 
-### **Cpu0 TableGen 文件**
+1. **栈** ：
 
-#### **1. 定义寄存器（Cpu0RegisterInfo.td）**
+* 每个 BPF 程序有一个固定大小的栈（通常为 512 字节），用于存储局部变量和临时数据。
+* 通过 `R10` 寄存器访问栈。
 
-```tablegen
-// 定义寄存器的父类
-class Cpu0Reg<bits<16> Enc, string n> : Register<n> {
-  let HWEncoding = Enc; // 硬件编码
-  let Namespace = "Cpu0"; // 命名空间
-}
+1. **映射（Maps）** ：
 
-// 定义通用寄存器
-def ZERO : Cpu0Reg<0,  "zero">, DwarfRegNum<[0]>; // 零寄存器
-def AT   : Cpu0Reg<1,  "at">,   DwarfRegNum<[1]>; // 汇编临时寄存器
-def V0   : Cpu0Reg<2,  "v0">,   DwarfRegNum<[2]>; // 返回值寄存器 0
-def V1   : Cpu0Reg<3,  "v1">,   DwarfRegNum<[3]>; // 返回值寄存器 1
-def A0   : Cpu0Reg<4,  "a0">,   DwarfRegNum<[4]>; // 参数寄存器 0
-def A1   : Cpu0Reg<5,  "a1">,   DwarfRegNum<[5]>; // 参数寄存器 1
-def T0   : Cpu0Reg<6,  "t0">,   DwarfRegNum<[6]>; // 临时寄存器 0
-def T1   : Cpu0Reg<7,  "t1">,   DwarfRegNum<[7]>; // 临时寄存器 1
-def T9   : Cpu0Reg<8,  "t9">,   DwarfRegNum<[8]>; // 临时寄存器 9
-def S0   : Cpu0Reg<9,  "s0">,   DwarfRegNum<[9]>; // 保存寄存器 0
-def S1   : Cpu0Reg<10, "s1">,   DwarfRegNum<[10]>; // 保存寄存器 1
-def GP   : Cpu0Reg<11, "gp">,   DwarfRegNum<[11]>; // 全局指针寄存器
-def FP   : Cpu0Reg<12, "fp">,   DwarfRegNum<[12]>; // 帧指针寄存器
-def SP   : Cpu0Reg<13, "sp">,   DwarfRegNum<[13]>; // 栈指针寄存器
-def LR   : Cpu0Reg<14, "lr">,   DwarfRegNum<[14]>; // 链接寄存器
-def SW   : Cpu0Reg<15, "sw">,   DwarfRegNum<[15]>; // 状态寄存器
+* BPF 映射是一种键值对存储结构，用于在内核和用户空间之间共享数据。
+* 支持多种映射类型（如哈希表、数组、环形缓冲区等）。
 
-// 定义特殊寄存器
-def PC   : Cpu0Reg<16, "pc">,   DwarfRegNum<[16]>; // 程序计数器
-def EPC  : Cpu0Reg<17, "epc">,  DwarfRegNum<[17]>; // 异常程序计数器
+1. **上下文数据** ：
 
-// 定义寄存器类
-def CPURegs : RegisterClass<"Cpu0", [i32], 32, (add
-  ZERO, AT, V0, V1, A0, A1, T0, T1, T9, S0, S1, GP, FP, SP, LR, SW
-)>;
+* BPF 程序可以访问特定的上下文数据（如网络数据包、跟踪事件等）。
+* 上下文数据的格式由程序类型决定。
 
-def SR     : RegisterClass<"Cpu0", [i32], 32, (add SW)>; // 状态寄存器类
-def C0Regs : RegisterClass<"Cpu0", [i32], 32, (add PC, EPC)>; // 特殊寄存器类
+## LLVM添加一个新后端
+
+由于llvm的结构化设计和实现，当为它添加新的后端是一般来书只需要对后端指令集、ABI(二进制接口接口)进行处理即可，但是现实情况是，一些后端会定义独有的数据类型、指令等，LLVM框架通常不能处理，此时需要添加特殊处理功能，否则会出错，此外，为了生成高质量的后端代码，LLVM还会针对后端经销一些特有的优化。
+
+### 适配新后端的各个阶段
+
+LLVM IR --------> ( 指令选择 )--------> 指令调度1 -------> 编译优化-1 --------> [ 寄存器分配 ] ----------> (插入前言/后序) ----
+
+    -----> 编译优化-2--------> 指令调度-2---------> 其他优化 ------------>( 机器码生成)
+
+（ ）[ ] 是添加新后端的必要过程 ，其他是优化是影响最后生成代码质量
+
+## 指令选择
+
+指令选择的工作是将LLVM IR 转换成目标相关的后端IR表达MachineInstr。
+
+### 流程
+
+LLVM IR -----> SelectionDAGBuilder ------{ SelectionDAG } ---->[ SelectionDAGsel | TargetLowering ] ------|
+
+    ---------> { Machine SelectionDAG} --------> ScheduleDAGSDNode ------------> MachineInstr
+
+从IR结构上区分，指令选择包含3个阶段：SelcctionDAG构建、Machine SelectionDAG匹配目标相关的指令操作和MachineInstr生成
+
+### LLVM IR
+
+LLVM IR 是 LLVM编译器的中间表示，他是一种与平台无关的、高级的伪汇编语言。LLVM IR 是编译器前端生成的中间结果，用于表示程序的逻辑，LLVM IR的设计目标是简洁、易于优化，并且能够高效地转换为目标机器代码。
+
+### SelectionDAGBuilder
+
+作用是将LLVM IR转换为一个有向无环图(DAG)结构，称为SelectionDAG,是一种中间表示，用于更直观地表示指令之间的依赖关系和操作。
+
+### SelectionDAG
+
+一个有向无环图，用于表示程序的指令流和数据依赖关系，每个节点(SDNode)表示一个操作(如加法、乘法、加载、存储等)，边表示依赖关系。与目标无关属性。
+
+### TargetLowering 和 SelectionDAGSel
+
+TargetLowering和SelectionDAGSel(DAG指令选择)是将目标无关的SelectionDAG转换的目标机器指令的过程。
+
+* TargetLowering:
+  作用： 将目标无关的SelectionDAG节点转换为目标架构支持的操作。例如，某些复杂的操作可能需要分解为多个目标架构支持的简单操作。
+  输入：目标无关SelectionDAG
+  输出：目标相关的 SelectionDAG (Machine SelectionDAG)
+  主要任务：
+  * 操作分解： 将复杂的操作分解为目标架构支持的简单操作
+  * 指令选择： 根据目标架构的特性，选择合适的指令来实现每个操作
+* SelectionDAGSel:
+  作用 ：将目标相关的SelectionDAG(Machine SelectionDAG)转换为MachineInstr
+  输入 ：目标相关的SelectionDAG
+  输出：MachineInstr列表
+  主要任务：
+  * 指令匹配：根据目标架构的指令集，将SelectionDAG中的节点匹配到具体的机器指令
+  * 指令生成：生成目标架构的机器指令
+
+### Machine SelectionDAG
+
+Machine SelectionDAG 是经过TargetLowering 处理后的目标相关的SelectionDAG。已经考虑了目标架构的属性，但是任为一个图结构，需要进一步转换为线性的机器指令序列。
+
+### ScheduleDAGSDNode
+
+ScheduleDAGDNode是对Mahcine SelectionDAG进行指令调度的阶段。指令调度的目的是优化指令的执行顺序，以提高目标机器的性能。
+
+* 输入： Machine SelectionDAG
+* 输出 ： 有序的MachineInstr 列表
+* 主要任务：
+  * 依赖分析：分析指令之间的依赖关系，确保指令的执行顺序符合依赖关系
+  * 调度策略：根据目标架构的特性()
+  * 指令排序：将SelectionDAG中的节点转换为线性的MachineInstr列表
+
+### MachineInstr
+
+MachineInstr是LLVM后端代码生成的最终结果，表示目标机器的指令，每个MachieInstr对应一条目标机器的指令。
+
+* 输入：有序的MachineInstr列表
+* 输出：目标机器代码
+* 主要任务：
+
+  * 寄存器分配：为指令中的变量分配目标机器的寄存器
+  * 指令编码：将MachineInstr转换为二进制机器代码
+  * 代码生成：生成最终的目标机器代码
+
+### 总结
+
+1. LLVM IR 被转换为目标无关的SelectionDAG
+2. TargetLowering 将目标无关的 SelectionDAG转换为目标相关的Machine SelectionDAG
+3. SelectionDAGSel 将目标相关的 Machine SelectionDAG 转换为MachineInstr
+4. ScheduleDAGSDNode 对MachineInstr进行指令调度，生成有序的指令序列。
+5. 最终MachineInstr被转换为目标机器代码
+
+注：SelectionDAG线性化过程是将SelectionDAG按照⼀定规则平铺开来，⽣成MIR形式。该过程也是后端⽆关的，所以也不需要适配。
+
+
+### 寄存器分配相关适配
+
+寄存器分配阶段的输入和输出IR都是MachineInstr.其中输入的IR寄存器类型通常为虚拟寄存器。经过寄存器分配后，虚拟寄存器被分配到具体后端支持的物理寄存器或者栈上。LLVM高度抽象了寄存器分配算法，让算法和具体后端无关。但是在寄存器分配的过程中，需要知道后端定义了哪些寄存器、寄存器类型、个数等信息，这些性喜是通过TD文件呈现
+
+#### 流程
+
+MachineInstr ---------------------> 寄存器分配  -------------------------------------> MachineInstr
+
+    |
+
+    依赖
+
+    |
+
+    V
+
+    xxxRegsterInfo.td
+
+### 插入前言/后序
+
+
+
+### 机器吗生成相关的适配
+
+
+
+### 添加新后端所需要的适配
+
+
+
+
+
+## LLVM 支持BPF
+
+### 1. **BPF.td**
+
+这是 BPF 目标架构的主定义文件，通常包含以下内容：
+
+* 目标架构的基本描述（如寄存器、指令集、调用约定等）。
+* 包含其他 `.td` 文件的引用。
+* 定义目标架构的全局属性和配置。
+
+ **作用** ：
+
+* 作为 BPF 后端的主入口文件，整合所有相关的定义。
+* 定义目标架构的全局特性。
+
+---
+
+### 2. **BPFInstrFormats.td**
+
+该文件定义了 BPF 指令的格式。每条指令的编码格式（如操作码、寄存器、立即数等）都在此文件中定义。
+
+ **作用** ：
+
+* 定义 BPF 指令的二进制编码格式。
+* 描述指令的字段布局（如操作码、源寄存器、目标寄存器、偏移量等）。
+
+ **示例** ：
+
 ```
-
----
-
-#### **2. 定义指令集（Cpu0InstrInfo.td）**
-
-```tablegen
-// 包含目标描述文件
-include "Cpu0RegisterInfo.td"
-
-// 定义指令格式
-class FL<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>
+class InstBPF<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>
   : Instruction {
-  bits<8> Opcode = op;
-  dag OutOperandList = outs;
-  dag InOperandList = ins;
-  string AsmString = asmstr;
-  list<dag> Pattern = pattern;
-  let Namespace = "Cpu0";
+  bits<32> Inst;
+  let Inst{31-24} = op;
+  ...
 }
-
-// 定义算术指令
-class ArithLogicI<bits<8> op, string instr_asm, SDNode OpNode, Operand Od>
-  : FL<op, (outs GPROut:$ra), (ins CPURegs:$rb, Od:$imm16),
-       !strconcat(instr_asm, "\t$ra, $rb, $imm16"),
-       [(set GPROut:$ra, (OpNode CPURegs:$rb, Od:$imm16))]>;
-
-// 定义加载/存储指令
-class LoadM<bits<8> op, string instr_asm, PatFrag OpNode, RegisterClass RC,
-            Operand MemOpnd>
-  : FL<op, (outs RC:$ra), (ins MemOpnd:$addr),
-       !strconcat(instr_asm, "\t$ra, $addr"),
-       [(set RC:$ra, (OpNode addr:$addr))]>;
-
-class StoreM<bits<8> op, string instr_asm, PatFrag OpNode, RegisterClass RC,
-             Operand MemOpnd>
-  : FL<op, (outs), (ins RC:$ra, MemOpnd:$addr),
-       !strconcat(instr_asm, "\t$ra, $addr"),
-       [(OpNode RC:$ra, addr:$addr)]>;
-
-// 定义具体指令
-def ADDiu : ArithLogicI<0x09, "addiu", add, simm16>; // 加立即数
-def LW    : LoadM<0x23, "lw", load, CPURegs, mem>;   // 加载字
-def SW    : StoreM<0x2B, "sw", store, CPURegs, mem>; // 存储字
-def JR    : FL<0x3C, (outs), (ins GPROut:$ra), "jr\t$ra", [(brind GPROut:$ra)]>; // 跳转
-def RET   : FL<0x3C, (outs), (ins GPROut:$ra), "ret", [(retflag)]>; // 返回
 ```
 
 ---
 
-#### **3. 定义调度信息（Cpu0Schedule.td）**
+### 3. **BPFInstrInfo.td**
 
-```tablegen
-// 定义功能单元
-def ALU : FuncUnit; // 算术逻辑单元
+该文件定义了 BPF 的具体指令。每条指令的操作码、操作数、汇编格式和编码都在此文件中定义。
 
-// 定义指令调度类
-def IIAlu   : InstrItinClass; // 算术指令
-def IILoad  : InstrItinClass; // 加载指令
-def IIStore : InstrItinClass; // 存储指令
-def IIBranch: InstrItinClass; // 分支指令
+ **作用** ：
 
-// 定义调度信息
-def Cpu0GenericItineraries : ProcessorItineraries<[ALU], [], [
-  InstrItinData<IIAlu,    [InstrStage<1, [ALU]>]>, // 算术指令 1 周期
-  InstrItinData<IILoad,   [InstrStage<3, [ALU]>]>, // 加载指令 3 周期
-  InstrItinData<IIStore,  [InstrStage<1, [ALU]>]>, // 存储指令 1 周期
-  InstrItinData<IIBranch, [InstrStage<1, [ALU]>]>  // 分支指令 1 周期
+* 定义 BPF 指令的具体实现。
+* 将指令的操作码、操作数和汇编格式关联起来。
+
+ **示例** ：
+
+```
+def ADD_rr : InstBPF<0x01, (outs GPR:$dst), (ins GPR:$src1, GPR:$src2),
+                     "add $dst, $src1, $src2", []>;
+```
+
+---
+
+### 4. **BPFRegisterInfo.td**
+
+该文件定义了 BPF 的寄存器及其属性。包括通用寄存器、特殊寄存器（如栈指针、程序计数器）等。
+
+ **作用** ：
+
+* 定义 BPF 的寄存器集合。
+* 描述寄存器的属性（如是否为保留寄存器、是否可用于某些操作等）。
+
+ **示例** ：
+
+```
+def R0 : Register<"r0">;
+def R1 : Register<"r1">;
+...
+def R10 : Register<"r10">;
+```
+
+---
+
+### 5. **BPFRegisterBanks.td**
+
+该文件定义了 BPF 的寄存器组（Register Banks）。寄存器组用于将寄存器分类，以便在指令选择时进行优化。
+
+ **作用** ：
+
+* 定义寄存器的分组（如通用寄存器组、浮点寄存器组等）。
+* 优化指令选择时对寄存器的使用。
+
+ **示例** ：
+
+```
+def GPRB : RegisterBank<"GPR", [R0, R1, ..., R10]>;
+```
+
+---
+
+### 6. **BPFCallingConv.td**
+
+该文件定义了 BPF 的调用约定（Calling Convention）。调用约定规定了函数调用时参数传递、返回值传递和寄存器使用的规则。
+
+ **作用** ：
+
+* 定义 BPF 的函数调用约定。
+* 描述参数和返回值如何通过寄存器或栈传递。
+
+ **示例** ：
+
+```c++
+def BPF_C : CallingConv<[
+  // 参数传递规则
+  CCIfType<[i32], CCAssignToReg<[R1, R2, R3, R4, R5]>>,
+  // 返回值传递规则
+  CCIfType<[i32], CCAssignToReg<[R0]>>
 ]>;
-```
-
----
-
-#### **4. 定义目标描述（Cpu0.td）**
-
-```tablegen
-// 包含目标描述文件
-include "Cpu0RegisterInfo.td"
-include "Cpu0InstrInfo.td"
-include "Cpu0Schedule.td"
-
-// 定义目标
-def Cpu0 : Target {
-  let InstructionSet = Cpu0InstrInfo; // 指令集
-  let RegisterInfo = Cpu0RegisterInfo; // 寄存器信息
-  let Itineraries = Cpu0GenericItineraries; // 调度信息
-}
-```
-
----
-
-### **5. 生成 C++ 代码**
-
-将上述 `.td` 文件保存到 `llvm/lib/Target/Cpu0` 目录中，然后使用 `llvm-tblgen` 生成 C++ 代码：
-
-```bash
-llvm-tblgen -gen-register-info Cpu0.td -o Cpu0GenRegisterInfo.inc
-llvm-tblgen -gen-instr-info Cpu0.td -o Cpu0GenInstrInfo.inc
-llvm-tblgen -gen-subtarget Cpu0.td -o Cpu0GenSubtargetInfo.inc
 ```

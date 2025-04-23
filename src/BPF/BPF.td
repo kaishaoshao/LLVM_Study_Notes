@@ -6,164 +6,63 @@
 //
 //===----------------------------------------------------------------------===//
 
+// 包含 LLVM 目标描述框架的基类定义
 include "llvm/Target/Target.td"
 
-include "BPFRegisterInfo.td"
-include "BPFCallingConv.td"
-include "BPFInstrInfo.td"
-include "GISel/BPFRegisterBanks.td"
+// 包含 BPF 特有的定义
+include "BPFRegisterInfo.td"  // 寄存器定义（如 r0-r10）
+include "BPFCallingConv.td"   // 调用约定（参数传递规则）
+include "BPFInstrInfo.td"     // 指令集定义（如 ADD、LDW 等）
 
+// 定义指令信息容器，将用于生成 BPFInstrInfo 类
 def BPFInstrInfo : InstrInfo;
 
+// 定义处理器模型（用于子目标特性配置）
+// Name: 处理器名称
+// Features: 支持的子目标特性列表
 class Proc<string Name, list<SubtargetFeature> Features>
- : Processor<Name, NoItineraries, Features>;
+ : Processor<Name, NoItineraries, Features>; // NoItineraries 表示无调度信息
 
+// 具体处理器定义（BPF 的不同版本）
+def : Proc<"generic", []>;   // 通用基础版本
+def : Proc<"v1", []>;        // v1 版本
+def : Proc<"v2", []>;        // v2 版本
+def : Proc<"v3", []>;        // v3 版本
+def : Proc<"probe", []>;     // 探测用特殊版本
+
+// 子目标特性定义（编译时可启用的功能）
 def DummyFeature : SubtargetFeature<"dummy", "isDummyMode",
-                                    "true", "unused feature">;
+                                    "true", "unused feature">; // 示例用的空特性
 
 def ALU32 : SubtargetFeature<"alu32", "HasAlu32", "true",
-                             "Enable ALU32 instructions">;
+                             "Enable ALU32 instructions">; // 启用 32 位 ALU 指令
 
 def DwarfRIS: SubtargetFeature<"dwarfris", "UseDwarfRIS", "true",
-                               "Disable MCAsmInfo DwarfUsesRelocationsAcrossSections">;
+                               "Disable MCAsmInfo DwarfUsesRelocationsAcrossSections">; // 调试信息相关设置
 
-def : Proc<"generic", []>;
-def : Proc<"v1", []>;
-def : Proc<"v2", []>;
-def : Proc<"v3", [ALU32]>;
-def : Proc<"v4", [ALU32]>;
-def : Proc<"probe", []>;
-
+// 汇编代码生成器配置
 def BPFInstPrinter : AsmWriter {
-  string AsmWriterClassName  = "InstPrinter";
-  bit isMCAsmWriter = 1;
+  string AsmWriterClassName  = "InstPrinter"; // 使用 InstPrinter 类生成汇编
+  bit isMCAsmWriter = 1;                      // 标记为 MC 层汇编生成器
 }
 
+// 汇编解析器配置
 def BPFAsmParser : AsmParser {
-  bit HasMnemonicFirst = 0;
+  bit HasMnemonicFirst = 0; // 指令不以助记符开头（BPF 汇编的特殊语法）
 }
 
+// 汇编方言配置
 def BPFAsmParserVariant : AsmParserVariant {
-  int Variant = 0;
-  string Name = "BPF";
-  string BreakCharacters = ".";
-  string TokenizingCharacters = "#()[]=:.<>!+*%/";
+  int Variant = 0;                   // 方言版本号
+  string Name = "BPF";               // 方言名称
+  string BreakCharacters = ".";      // 分隔符字符
+  string TokenizingCharacters = "#()[]=:.<>!+*"; // 特殊词法分析字符
 }
 
+// 目标机器整体定义
 def BPF : Target {
-  let InstructionSet = BPFInstrInfo;
-  let AssemblyWriters = [BPFInstPrinter];
-  let AssemblyParsers = [BPFAsmParser];
-  let AssemblyParserVariants = [BPFAsmParserVariant];
-}
-
-
-#ifndef __RISCV_CSR_H
-#define __RISCV_CSR_H
-
-#ifndef __RISCV_XLEN
-#ifndef __riscv_xlen
-#define __RISCV_XLEN 32
-#else
-#define __RISCV_XLEN __riscv_xlen
-#endif
-#endif /* __RISCV_XLEN */
-
-#if __RISCV_XLEN == 32
-typedef uint32_t rv_csr_t;
-#elif __RISCV_XLEN == 64
-typedef uint64_t rv_csr_t;
-#else
-typedef uint32_t rv_csr_t;
-#endif
-#define __STR(s) #s
-#define STRINGIFY(s) __STR(s)
-
-#define __RV_CSR_READ(csr)                                                     \
-  ({                                                                           \
-    register rv_csr_t __v;                                                     \
-    __asm volatile("csrr %0, " STRINGIFY(csr) : "=r"(__v) : : "memory");       \
-    __v;                                                                       \
-  })
-
-static inline uint64_t __get_rv_instret(void) {
-#if __RISCV_XLEN == 32
-  volatile uint32_t high0, low, high;
-  uint64_t full;
-
-  high0 = __RV_CSR_READ(CSR_MINSTRETH);
-  low = __RV_CSR_READ(CSR_MINSTRET);
-  high = __RV_CSR_READ(CSR_MINSTRETH);
-  if (high0 != high) {
-    low = __RV_CSR_READ(CSR_MINSTRET);
-  }
-  full = (((uint64_t)high) << 32) | low;
-  return full;
-#elif __RISCV_XLEN == 64
-  return (uint64_t)__RV_CSR_READ(CSR_MINSTRET);
-#else // TODO Need cover for XLEN=128 case in future
-  return (uint64_t)__RV_CSR_READ(CSR_MINSTRET);
-#endif
-}
-
-static inline uint64_t __get_rv_cycle(void) {
-#if __RISCV_XLEN == 32
-  volatile uint32_t high0, low, high;
-  uint64_t full;
-
-  high0 = __RV_CSR_READ(CSR_MCYCLEH);
-  low = __RV_CSR_READ(CSR_MCYCLE);
-  high = __RV_CSR_READ(CSR_MCYCLEH);
-  if (high0 != high) {
-    low = __RV_CSR_READ(CSR_MCYCLE);
-  }
-  full = (((uint64_t)high) << 32) | low;
-  return full;
-#elif __RISCV_XLEN == 64
-  return (uint64_t)__RV_CSR_READ(CSR_MCYCLE);
-#else // TODO Need cover for XLEN=128 case in future
-  return (uint64_t)__RV_CSR_READ(CSR_MCYCLE);
-#endif
-}
-#endif
-
-
-/*
- * Copyright (c) 2021 HPMicro
- *
- * SPDX-License-Identifier: BSD-3-Clause
- *
- */
-
-#include "board.h"
-#include "hpm_csr_regs.h"
-#include "hpm_debug_console.h"
-#include <stdio.h>
-
-#include "csr.h"
-
-#define LED_FLASH_PERIOD_IN_MS 300
-
-int run_test(void);
-
-int main(void)
-{
-    board_init();
-    board_init_led_pins();
-
-    board_timer_create(LED_FLASH_PERIOD_IN_MS, board_led_toggle);
-    unsigned long begin_instret, end_instret, instret_nice;
-    unsigned long begin_cycle, end_cycle, cycle_nice;
-    begin_instret = __get_rv_instret();
-    begin_cycle = __get_rv_cycle();
-
-    int ret = run_test();
-
-    end_instret = __get_rv_instret();
-    end_cycle = __get_rv_cycle();
-
-    instret_nice = end_instret - begin_instret;
-    cycle_nice = end_cycle - begin_cycle;
-    printf("mcycle: %lu, icount: %lu\n", cycle_nice, instret_nice);
-    return ret;
+  let InstructionSet = BPFInstrInfo;          // 绑定指令集
+  let AssemblyWriters = [BPFInstPrinter];     // 指定汇编生成器
+  let AssemblyParsers = [BPFAsmParser];       // 指定汇编解析器
+  let AssemblyParserVariants = [BPFAsmParserVariant]; // 指定方言配置
 }
