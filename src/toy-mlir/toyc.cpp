@@ -2,7 +2,7 @@
 #include "include/AST.h"
 #include "include/Lexer.h"
 
-#include "llvm/ADT/Stringref.h"
+#include "llvm/ADT/StringRef.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -25,10 +25,9 @@ static cl::opt<std::string> inputFilename(cl::Positional,
                                           cl::init("-"),
                                           cl::value_desc("filename"));
 
-static cl::opt<enum Action> emitAction("emit", cl::desc("Select the kind of output desired"),
-                                       cl::values(clEnumValN()))
-
-
+static cl::opt<enum Action>
+    emitAction("emit", cl::desc("Select the kind of output desired"),
+    cl::values(clEnumValN(DumpAST, "ast", "output the AST dump")));
 
 std::unique_ptr<toy::ModuleAST> parseInputFile(llvm::StringRef filename){
     llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr =
@@ -40,7 +39,7 @@ std::unique_ptr<toy::ModuleAST> parseInputFile(llvm::StringRef filename){
         }
         auto buffer = fileOrErr.get()->getBuffer();
         LexerBuffer lexer(buffer.begin(), buffer.end(), std::string(filename));
-        Paeser parser(lexer);
+        Parser parser(lexer);
         return parser.parseModule();
 }
 

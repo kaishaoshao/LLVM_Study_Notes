@@ -52,7 +52,7 @@ public:
     ExprASTKind getKind() const { return kind; }
 
     /// 获取源码位置信息
-    const Location& getLocation() const { return location; }
+    const Location &getLoc() const { return location; }
 
 
 private:
@@ -280,10 +280,10 @@ public:
 /// 模块节点（包含多个函数定义）
 class ModuleAST {
 private:
-    std::vector<std::unique_ptr<FunctionAST>> functions;
+    std::vector<FunctionAST> functions;
 
 public:
-    ModuleAST(std::vector<std::unique_ptr<FunctionAST>> functions) :
+    ModuleAST(std::vector<FunctionAST> functions) :
         functions(std::move(functions)) {}
 
     /// 迭代器

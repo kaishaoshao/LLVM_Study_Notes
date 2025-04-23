@@ -54,11 +54,11 @@ private:
 } // namespace
 
 /// 生成节点位置信息的格式化字符串
-template <typename T> static std::string loc(T *node) {
-  const auto &loc = node->loc();
+template <typename T> 
+static std::string loc(T *node) {
+  const auto &loc = node->getLoc();
   return (llvm::Twine("@") + *loc.file + ":" + llvm::Twine(loc.line) + ":" +
-          llvm::Twine(loc.col))
-      .str();
+          llvm::Twine(loc.col)).str();
 }
 
 // 缩进宏：进入作用域增加缩进，离开时自动恢复
@@ -203,10 +203,14 @@ void ASTDumper::dump(const VarType &type) {
 // 函数原型处理： 输出函数名、参数列表和位置
 void ASTDumper::dump(PrototypeAST *node) {
   INDENT();
-  llvm::errs() << "Proto '" << node->getName() << "' " << loc(node) << " \n";
+  llvm::errs() << "Proto '" << node->getName() << "' " << loc(node)
+               << " \n";
   indent();
   llvm::errs() << "Params: [";
-  llvm::interleaveComma(node->getArgs(), llvm::errs());
+
+  llvm::interleaveComma(node->getArgs(), llvm::errs(),
+                        [](auto &arg) { llvm::errs() << arg->getName(); });
+  llvm::errs() << "]\n";
 }
 
 //  函数定义处理： 输出函数名、参数列表和位置
@@ -224,7 +228,7 @@ void ASTDumper::dump(ModuleAST *node) {
   INDENT();
   llvm::errs() << "Module:\n";
   for (auto &f : *node)
-    dump(&*f);
+    dump(&f);
 }
 
 namespace toy {

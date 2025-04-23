@@ -1,3 +1,5 @@
 # 头文件目录声明
-file(GLOB HEADER_FILES *.h *.hpp)
-# target_include_directories(toy-mlir PUBLIC ${HEADERS})
+add_library(INCLUDE_DIRS INTERFACE)
+target_include_directories(INCLUDE_DIRS INTERFACE 
+${CMAKE_CURRENT_LIST_DIR}/include
+)
