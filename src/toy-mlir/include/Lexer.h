@@ -9,7 +9,7 @@
 
 namespace toy
 {
-  
+
 /// 记录代码中的位置信息，便于调试和错误报告
 struct Location
 {
@@ -29,7 +29,7 @@ enum Token : int {
     tok_sbracket_open = '[',    // 左中括号
     tok_sbracket_close = ']',   // 右中括号
 
-    tok_eof = -1,               // 文件结束 
+    tok_eof = -1,               // 文件结束
 
     tok_return = -2,             // return
     tok_var = -3,                // var
@@ -46,7 +46,7 @@ enum Token : int {
 class Lexer{
 public:
     /// 构造函数：根据文件名创建词法分析器实例
-    Lexer(std::string filename) : 
+    Lexer(std::string filename) :
         lastLocation({std::make_shared<std::string>(filename), 0, 0}) {}
 
     virtual ~Lexer() = default;
@@ -69,9 +69,15 @@ public:
         return identifierStr;
     }
 
+    ///  Return the current number (prereq: getCurToken() == tok_number)
+    double getValue() {
+        assert(curTok == tok_number);
+        return numVal;
+    }
+
     /// 返回当前数字 （要求当前Token为数字）
     double getNumber(){
-        assert(curTok == tok_number);   
+        assert(curTok == tok_number);
         return numVal;
     }
 
@@ -105,7 +111,7 @@ private:
 
 
 private:
-    
+
     /// 由子类实现：获取下一行内容。返回空字符串表示文件结束
     virtual llvm::StringRef readNextLine() = 0;
 
@@ -113,7 +119,7 @@ private:
     Token getTok() {
         while (isspace(lastChar))
             lastChar = Token(getNextChar());
-        
+
             // 记录当前Token的位置信息
             lastLocation.line = curLine;
             lastLocation.col = curCol;
@@ -121,7 +127,7 @@ private:
             // 如果当前字符是字母[a-zA-Z][a-zA-Z0-9_]*，则从输入流中返回下一个标识符
             if(isalpha(lastChar)) {
                 identifierStr = (char)lastChar;
-                while (isalnum(lastChar = Token(getNextChar())) || lastChar == '_') 
+                while (isalnum(lastChar = Token(getNextChar())) || lastChar == '_')
                     identifierStr += (char)lastChar;
                 if (identifierStr == "var")
                     return tok_var;
@@ -129,7 +135,7 @@ private:
                     return tok_def;
                 if (identifierStr == "return")
                     return tok_return;
-                
+
                 return tok_identifier;
             }
 
@@ -141,7 +147,7 @@ private:
                     numStr += lastChar;
                     lastChar = Token(getNextChar());
                 } while (isdigit(lastChar) || lastChar == '.');
-                
+
                 numVal = strtod(numStr.c_str(), nullptr);
                 return tok_number;
             }
@@ -153,18 +159,18 @@ private:
                     lastChar = Token(getNextChar());
                 } while (lastChar != EOF && lastChar != '\n' && lastChar != '\r');
 
-                if (lastChar != EOF)    
+                if (lastChar != EOF)
                 {
                     return getTok();
                 }
             }
 
             // 如果当前字符是 EOF，则返回 EOF
-            if (lastChar == EOF)    
+            if (lastChar == EOF)
             {
                 return tok_eof;
             }
-            
+
             // 返回当前字符
             Token thisChar = Token(lastChar);
             lastChar = Token(getNextChar());
@@ -181,7 +187,7 @@ private:
         auto nextChar = curLineBuffer.front();
         // 将 curLineBuffer 更新为移除第一个字符后的新缓冲区
         curLineBuffer = curLineBuffer.drop_front();
-        
+
         // 一行结束 更新
         if(curLineBuffer.empty())
             curLineBuffer = readNextLine();

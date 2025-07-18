@@ -49,10 +49,13 @@ private:
     std::unique_ptr<PrototypeAST> parsePrototype();
 
     std::unique_ptr<FunctionAST> parseDefinition();
+
+    int getTokPrecedence();
+
+    template <typename R, typename T, typename U = const char *>
+    std::unique_ptr<R> parseError(T &&expected, U &&context = " ");
 };
-}
 
-
-
+} // namespace toy
 
 #endif //  __TOY_PASER_H__
