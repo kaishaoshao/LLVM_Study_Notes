@@ -38,16 +38,16 @@ public:
         Expr_BinOp,   // 二元运算
         Expr_Call,    // 函数调用
         Expr_Print,   // 打印节点
-    };      
-    
+    };
+
     /// 构造函数
     ExprAST(ExprASTKind kind, Location location)
          : kind(kind), location(location) {}
 
 
     /// 析构函数
-    virtual ~ExprAST() = default; 
-    
+    virtual ~ExprAST() = default;
+
     /// 获取节点类型
     ExprASTKind getKind() const { return kind; }
 
@@ -69,12 +69,12 @@ private:
     double val;  // 存储数值
 
 public:
-    NumberExprAST(Location loc, double val) : 
+    NumberExprAST(Location loc, double val) :
                 ExprAST(Expr_Num, std::move(loc)), val(val) {}
     /// 获取数值
     double getValue() { return val; }
     /// llvm风格类型检查（用于安全向下转型）
-    static bool classof(const ExprAST *c) { 
+    static bool classof(const ExprAST *c) {
         return c->getKind() == Expr_Num;
     }
 
@@ -90,7 +90,7 @@ public:
     LiteralExprAST(Location loc, std::vector<std::unique_ptr<ExprAST>> values,
         std::vector<int64_t> dims) : ExprAST(Expr_Literal, std::move(loc)),
                                     values(std::move(values)), dims(std::move(dims)) {}
-    
+
     /// 获取所有元素（包括嵌套数组）
     llvm::ArrayRef<std::unique_ptr<ExprAST>> getValues() {
         return values;
@@ -112,7 +112,7 @@ private:
     std::string name; // 变量名
 
 public:
-    VariableExprAST(Location loc, llvm::StringRef name) 
+    VariableExprAST(Location loc, llvm::StringRef name)
         : ExprAST(Expr_Var, std::move(loc)), name(name) {}
 
     /// 获取变量名
@@ -133,7 +133,7 @@ private:
     std::unique_ptr<ExprAST> initVal; // 初始化表达式
 
 public:
-    VarDeclExprAST(Location loc, llvm::StringRef name, VarType type, 
+    VarDeclExprAST(Location loc, llvm::StringRef name, VarType type,
         std::unique_ptr<ExprAST> initVal) : ExprAST(Expr_VarDecl, std::move(loc)),
         name(name), type(std::move(type)), initVal(std::move(initVal)) {}
 
@@ -162,7 +162,7 @@ public:
         ExprAST(Expr_Return, std::move(loc)), expr(std::move(expr)) {}
 
     /// 获取返回值表达式 （若无返回值为空）
-    std::optional<ExprAST *> getExpr() { 
+    std::optional<ExprAST *> getExpr() {
         if(expr.has_value())
             return expr->get();
         return std::nullopt;
@@ -181,11 +181,11 @@ private:
     std::unique_ptr<ExprAST> lhs, rhs;    // 左右操作数
 public:
     BinaryExprAST(Location loc, char op, std::unique_ptr<ExprAST> lhs,
-                  std::unique_ptr<ExprAST> rhs) : 
-                  ExprAST(Expr_BinOp, std::move(loc)), op(op), 
+                  std::unique_ptr<ExprAST> rhs) :
+                  ExprAST(Expr_BinOp, std::move(loc)), op(op),
                   lhs(std::move(lhs)), rhs(std::move(rhs)) {}
-                
-    /// 获取操作符              
+
+    /// 获取操作符
     char getOp() { return op; }
     /// 获取左操作数
     ExprAST *getLHS() { return lhs.get(); }
@@ -206,7 +206,7 @@ private:
     std::vector<std::unique_ptr<ExprAST>> args; // 参数列表
 
 public:
-    CallExprAST(Location loc, const std::string &callee, 
+    CallExprAST(Location loc, const std::string &callee,
             std::vector<std::unique_ptr<ExprAST>> args)
             : ExprAST(Expr_Call, std::move(loc)), callee(callee),
             args(std::move(args)) {}
@@ -244,10 +244,10 @@ class PrototypeAST {
 private:
     Location loc;                 // 函数定义位置
     std::string name;             // 函数名
-    std::vector<std::unique_ptr<VarDeclExprAST>> args; // 参数列表
-public:
-    PrototypeAST(Location loc, llvm::StringRef name,
-                  std::vector<std::unique_ptr<VarDeclExprAST>> args) :
+    std::vector<std::unique_ptr<VariableExprAST>> args; // 参数列表
+  public:
+    PrototypeAST(Location loc, const std::string &name,
+                  std::vector<std::unique_ptr<VariableExprAST>> args) :
                   loc(std::move(loc)), name(name), args(std::move(args)) {}
 
     /// 获取函数定义位置
@@ -255,7 +255,7 @@ public:
     /// 获取函数名
     llvm::StringRef getName() { return name; }
     /// 获取参数列表
-    llvm::ArrayRef<std::unique_ptr<VarDeclExprAST>> getArgs() { return args; }
+    llvm::ArrayRef<std::unique_ptr<VariableExprAST>> getArgs() { return args; }
 };
 
 
@@ -263,18 +263,18 @@ public:
 class FunctionAST {
 private:
     std::unique_ptr<PrototypeAST> proto;  // 函数原型
-    std::unique_ptr<ExprAST> body;        // 函数体  
+    std::unique_ptr<ExprASTList> body;    // 函数体
 
-public:
+  public:
     FunctionAST(std::unique_ptr<PrototypeAST> proto,
-                std::unique_ptr<ExprAST> body) :
+                std::unique_ptr<ExprASTList> body) :
                 proto(std::move(proto)), body(std::move(body)) {}
-    
+
     /// 获取函数原型
     PrototypeAST *getProto() { return proto.get(); }
     /// 获取函数体
-    ExprAST *getBody() { return body.get(); }
-    
+    ExprASTList *getBody() { return body.get(); }
+
 };
 
 /// 模块节点（包含多个函数定义）

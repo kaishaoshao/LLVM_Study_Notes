@@ -40,7 +40,7 @@ private:
 
     std::unique_ptr<ExprAST> parseExpression();
 
-    std::unique_ptr<ExprAST> parseType();
+    std::unique_ptr<VarType> parseType();
 
     std::unique_ptr<VarDeclExprAST> parseDeclaration();
 
