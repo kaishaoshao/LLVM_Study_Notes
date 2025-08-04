@@ -8,8 +8,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib) # 静态库输出�
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib) # 动态库输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin) # 可执行文件输出目录
 
-
-
 add_subdirectory(include)
 add_subdirectory(paser)
 
@@ -30,14 +28,26 @@ llvm_map_components_to_libnames(llvm_libs
     Support       # 基础工具（MemoryBuffer、errs() 等）
 )
 
+# MLIR 相关组件
+get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
+get_property(translation_libs GLOBAL PROPERTY MLIR_TRANSLATION_LIBS)
 
 add_executable(toy-mlir toyc.cpp)
 
-target_link_libraries(toy-mlir PRIVATE 
+target_link_libraries(toy-mlir
+PRIVATE
     AST_LIB             # paser模块生成的库
     ${llvm_libs}
+    ${dialect_libs}
+    ${translation_libs}
+    MLIRIR
+    MLIRParser
+    MLIRPass
+    MLIRSPIRVDialect
+    MLIRTranslateLib
+    MLIRSupport
 #   ${GTEST_LIBRARIES}  # 测试库
 )
 
-
+mlir_check_link_libraries(toy-mlir)
 
