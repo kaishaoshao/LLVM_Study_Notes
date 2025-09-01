@@ -1,0 +1,1 @@
+../../../../../tritons/triton-cpu/llvm-project/build/bin/mlir-runner -e main -entry-point-result=i32 ./example_opt.mlir 
