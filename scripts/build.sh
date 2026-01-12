@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # 请将脚本放置在llvm-project根目录下执行
 
 # 获取当前脚本的绝对路径
@@ -13,7 +12,7 @@ if [ ! -d "$SCRIPT_DIR/build" ]; then
 fi
 
 # 配置 CMake 并生成构建文件
-# -DCMAKE_BUILD_TYPE=DebugRelease 
+# -DCMAKE_BUILD_TYPE=DebugRelease
 cmake -B "$SCRIPT_DIR/build"           \
     -DCMAKE_BUILD_TYPE=Release         \
     -DBUILD_SHARED_LIBS=ON             \
@@ -34,4 +33,3 @@ cmake -B "$SCRIPT_DIR/build"           \
 
 
 
-	
