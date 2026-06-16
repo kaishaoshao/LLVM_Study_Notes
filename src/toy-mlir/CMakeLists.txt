@@ -8,19 +8,23 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib) # 静态库输出�
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib) # 动态库输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin) # 可执行文件输出目录
 
-add_subdirectory(include)
-add_subdirectory(paser)
-
-# 测试库
-# add_subdirectory(test)
 
 
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+find_package(MLIR REQUIRED CONFIG)
+message(STATUS "Found MLIR ${MLIR_PACKAGE_VERSION}")
 
-# 包含 LLVM 头文件和定义
-include_directories(${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
+list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+
+include(TableGen)
+include(AddLLVM)
+include(AddMLIR)
+
+# 包含 LLVM 和 MLIR 头文件和定义
+include_directories(${LLVM_INCLUDE_DIRS} ${MLIR_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS} ${MLIR_DEFINITIONS})
 
 # 映射所有需要的 LLVM 组件
 llvm_map_components_to_libnames(llvm_libs
@@ -31,6 +35,10 @@ llvm_map_components_to_libnames(llvm_libs
 # MLIR 相关组件
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 get_property(translation_libs GLOBAL PROPERTY MLIR_TRANSLATION_LIBS)
+
+add_subdirectory(include)
+add_subdirectory(paser)
+add_subdirectory(test)
 
 add_executable(toy-mlir toyc.cpp)
 
